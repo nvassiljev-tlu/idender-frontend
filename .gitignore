@@ -1,7 +1,2 @@
-.next
 node_modules
-components.json
-eslint.config.mjs
-next-env.d.ts
-next.config.ts
-postcss.config.mjs
+.next
