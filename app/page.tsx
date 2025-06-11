@@ -8,7 +8,7 @@ export default function Home() {
       <div className="flex flex-col gap-4 w-full max-w-xs">
         {/* Link to Landing Page */}
         <Link
-          href="/landingpage"
+          href="/nonauthenticated/landing"
           className="bg-blue-500 hover:bg-gray-600 text-white py-2 px-4 rounded text-center transition"
         >
           Go to Landing Page
@@ -24,7 +24,7 @@ export default function Home() {
 
         {/* Link to Old Login Page */}
         <Link
-          href="/loginpage"
+          href="/nonauthenticated/loginpage"
           className="bg-blue-500 hover:bg-gray-600 text-white py-2 px-4 rounded text-center transition"
         >
           Go to Login placeholder Page
@@ -32,14 +32,14 @@ export default function Home() {
 
         {/* Link to Signup Page */}
         <Link
-          href="/signuppage"
+          href="/signup"
           className="bg-blue-500 hover:bg-gray-600 text-white py-2 px-4 rounded text-center transition"
         >
           Go to Signup Page
         </Link>
 
         <Link
-          href="/home"
+          href="/authenticated/home"
           className="bg-blue-500 hover:bg-gray-600 text-white py-2 px-4 rounded text-center transition"
         >
           Home

@@ -13,12 +13,12 @@ export default function LandingPage() {
       <div className="flex flex-col items-center text-center mt-10"> 
         <h2 className="text-lg text-white mb-7">Welcome to IDENDER</h2> {/* make text smaller */}
         <div className="sm:space-y-35"> 
-          <Link href="/loginpage">
+          <Link href="/login">
             <Button className="bg-white text-slate-700 hover:bg-slate-200 w-40 rounded-none">
               Login
             </Button>
           </Link>
-          <Link href="/signuppage">
+          <Link href="/signup">
             <Button className="bg-slate-700 text-white hover:bg-slate-600 w-40 rounded-none">
               Sign up
             </Button>

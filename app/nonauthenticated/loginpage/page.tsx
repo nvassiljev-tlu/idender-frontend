@@ -35,9 +35,9 @@ export default function Home() {
         </form>
         
         <div className="mt-4 text-center text-sm text-slate-600">
-          <a href="#" className="text-slate-700 hover:underline">Forgot password?</a>
+          <a href="#" className="text-slate-700 hover:underline">Forgot password?</a> /* currently does nothing */
           <span className="mx-2">•</span>
-          <Link href="/signuppage" className="text-slate-700 hover:underline">Sign Up</Link>
+          <Link href="/signup" className="text-slate-700 hover:underline">Sign Up</Link>
         </div>
       </div>
     </main>

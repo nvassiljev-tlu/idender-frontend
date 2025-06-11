@@ -85,7 +85,7 @@ export default function SignupPage() {
         setShowAlert(true);
 
         setTimeout(() => {
-          router.push('/loginpage');
+          router.push('/login');
         }, 2000);
       } else {
         const data = await response.json();

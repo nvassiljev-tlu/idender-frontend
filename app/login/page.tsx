@@ -41,9 +41,9 @@ export default function Page() {
       checkLogin();
     }, []);
   return (
-    <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
-      <div className="w-full max-w-sm">
-
+<div className="min-h-screen flex items-center justify-center">
+      <div className="bg-white backdrop-blur-sm p-6 rounded-xl shadow-lg max-w-md w-full">
+        <h1 className="text-4xl sm:text-6xl md:text-5xl font-bold text-slate-700 text-center">Idender</h1>
         <LoginForm />
       </div>
     </div>
