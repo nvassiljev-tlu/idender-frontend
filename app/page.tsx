@@ -16,15 +16,15 @@ export default function Home() {
 
         {/* Link to Login Page */}
         <Link
-          href="/loginpage"
+          href="/login"
           className="bg-blue-500 hover:bg-gray-600 text-white py-2 px-4 rounded text-center transition"
         >
           Go to Login Page
         </Link>
 
-        {/* Link to Login placeholder Page */}
+        {/* Link to Old Login Page */}
         <Link
-          href="/login"
+          href="/loginpage"
           className="bg-blue-500 hover:bg-gray-600 text-white py-2 px-4 rounded text-center transition"
         >
           Go to Login placeholder Page

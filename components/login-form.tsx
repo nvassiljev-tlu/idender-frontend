@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
@@ -60,7 +61,7 @@ export function LoginForm() {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
           control={form.control}
           name="email"
@@ -68,7 +69,7 @@ export function LoginForm() {
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input placeholder="your@email.com" {...field} />
+                <Input placeholder="Email" className="text-slate-900 w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-slate-700" required {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -81,15 +82,27 @@ export function LoginForm() {
             <FormItem>
               <FormLabel>Password</FormLabel>
               <FormControl>
-                <Input type="password" placeholder="Password" {...field} />
+                <Input type="password" placeholder="Password" className="text-slate-900 w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-slate-700" required {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
         {error && <div className="text-red-500">{error}</div>}
-        <Button type="submit">Submit</Button>
+        <button
+                type="submit"
+                className="w-full bg-slate-800 text-white py-2 px-4 rounded hover:bg-slate-500 transition duration-200"
+            >
+            Log In
+            </button>
       </form>
+        <div className="mt-4 text-center text-sm text-slate-600">
+          <a href="#" className="text-slate-700 hover:underline">Forgot password?</a>
+          <span className="mx-2">•</span>
+          <Link href="/signuppage" className="text-slate-700 hover:underline">Sign Up</Link>
+        </div>
     </Form>
+    
+    
   )
 }
