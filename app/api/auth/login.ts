@@ -40,8 +40,4 @@ export default async function handler(
     console.error('Database error:', error)
     return res.status(500).json({ message: 'Internal server error' })
   }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 4dddf239d9535821956e45acadcfdf183d92ed10
