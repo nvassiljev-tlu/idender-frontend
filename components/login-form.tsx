@@ -50,7 +50,7 @@ export function LoginForm() {
       if (response.ok) {
         // Login successful - redirect or set user state
         Cookie.set("sid", data.payload.data.session)
-        router.push("/home")
+        router.push("/authenticated/home")
       } else {
         setError(data.message || "Login failed")
       }

@@ -1,17 +1,19 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import Cookie from 'js-cookie';
 
 export default function IdenderDashboard() {
   const router = useRouter();
 
   const handleLogout = () => {
     //logout logic here
-    router.push('/loginpage');
+    Cookie.remove('sid'); // remove session cookie
+    router.push('/login');
   };
 
   const handleCreateIdea = () => {
-    router.push('/ideapage'); // go to idea page
+    router.push('/authenticated/new_idea'); // go to idea page
   };
 
   // mock data - replace with actual data fetching
@@ -84,7 +86,7 @@ return (
         
         <h1 className="text-xl font-bold">Idender</h1>
         
-        <button className="p-1 rounded-full hover:bg-slate-700 transition-colors">
+        <button onClick={() => {router.push('/authenticated/my_profile')}} className="p-1 rounded-full hover:bg-slate-700 transition-colors">
           <UserIcon aria-label="Profile" />
         </button>
       </header>
