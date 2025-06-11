@@ -10,6 +10,10 @@ export default function IdenderDashboard() {
     router.push('/loginpage');
   };
 
+  const handleCreateIdea = () => {
+    router.push('/ideapage'); // go to idea page
+  };
+
   // mock data - replace with actual data fetching
   const ideas = [
     { id: 1, title: 'More sustainable waste management for our school', author: 'John D.' },
@@ -23,9 +27,9 @@ export default function IdenderDashboard() {
     { id: 2, title: 'Proposed idea to "shut down the cafeteria" has been approved by the school board', date: 'May 25, 2025' },
     { id: 3, title: 'School cafeteria permanently shut down', date: 'June 1, 2025' },
     { id: 4, title: 'Malnourishment in Tallinn French Lyceum hit record levels', date: 'June 2, 2025'}
- ];
+  ];
 
-  // SVG Icons
+  // SVG icons from online
   const LogoutIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
@@ -58,8 +62,15 @@ export default function IdenderDashboard() {
     </svg>
   );
 
-  return (
-    <div className="min-h-screen bg-slate-100 text-slate-800">
+  const PlusIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="12" y1="5" x2="12" y2="19"></line>
+      <line x1="5" y1="12" x2="19" y2="12"></line>
+    </svg>
+  );
+
+return (
+    <div className="min-h-screen bg-slate-100 text-slate-800 flex flex-col">
       {/* header */}
       <header className="bg-slate-800 text-white p-4 flex justify-between items-center sticky top-0 z-10">
         <button 
@@ -79,7 +90,7 @@ export default function IdenderDashboard() {
       </header>
 
       {/* main content */}
-      <main className="container mx-auto p-4 pb-20">
+      <main className="container mx-auto p-4 flex-1 overflow-y-auto">
         {/* ideas section */}
         <section className="mb-8">
           <div className="flex items-center gap-2 mb-4">
@@ -101,7 +112,7 @@ export default function IdenderDashboard() {
         </section>
 
         {/* news section */}
-        <section>
+        <section className="mb-20"> {/* Added margin-bottom for button space */}
           <div className="flex items-center gap-2 mb-4">
             <NewspaperIcon/>
             <h2 className="text-xl font-semibold text-slate-800">News</h2>
@@ -121,8 +132,20 @@ export default function IdenderDashboard() {
         </section>
       </main>
 
+      {/* Centered Create Idea Button */}
+      <div className="fixed bottom-6 left-0 right-0 flex justify-center z-20">
+        <button
+          onClick={handleCreateIdea}
+          className="flex items-center gap-2 bg-slate-800 text-white px-6 py-3 rounded-full shadow-lg hover:bg-slate-700 transition-colors"
+          aria-label="Create new idea"
+        >
+          <PlusIcon />
+          <span>Create idea</span>
+        </button>
+      </div>
+
       {/* mobilefriendlier-ish bottom padding */}
-      <div className="h-16 sm:hidden"></div>
+      <div className="h-20 sm:hidden"></div>
     </div>
   );
 }

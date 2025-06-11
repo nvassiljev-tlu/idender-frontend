@@ -22,6 +22,14 @@ export default function Home() {
           Go to Login Page
         </Link>
 
+        {/* Link to Login placeholder Page */}
+        <Link
+          href="/login"
+          className="bg-blue-500 hover:bg-gray-600 text-white py-2 px-4 rounded text-center transition"
+        >
+          Go to Login placeholder Page
+        </Link>
+
         {/* Link to Signup Page */}
         <Link
           href="/signuppage"
@@ -31,10 +39,10 @@ export default function Home() {
         </Link>
 
         <Link
-          href="/testmain"
+          href="/home"
           className="bg-blue-500 hover:bg-gray-600 text-white py-2 px-4 rounded text-center transition"
         >
-          testRender
+          Home
         </Link>
       </div>
     </main>
