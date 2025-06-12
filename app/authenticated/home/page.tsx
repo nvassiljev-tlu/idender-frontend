@@ -2,9 +2,39 @@
 
 import { useRouter } from 'next/navigation';
 import Cookie from 'js-cookie';
+import { useEffect } from 'react';
 
 export default function IdenderDashboard() {
   const router = useRouter();
+
+  // check if user is logged in
+    useEffect(() => {
+      const token = Cookie.get('sid')
+      if (!token) {
+        router.push('/login')
+      }
+      const checkLogin = async () => {
+        try {
+          const res = await fetch('http://37.27.182.28:3001/v1/oauth/me', {
+            method: 'GET',
+            credentials: 'include',
+            headers: { 
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}` 
+            }
+          });
+          
+          if (res.status !== 200) {
+            Cookie.remove("sid")
+            router.push('/login')
+          }
+        } catch (err) {
+          console.log(err)
+        }
+      };
+  
+      checkLogin();
+    }, []);
 
   const handleLogout = () => {
     //logout logic here

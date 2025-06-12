@@ -58,8 +58,12 @@ export default function MyIdeasPage() {
         const res = await fetch(`http://37.27.182.28:3001/v1/users/${userId}/ideas`, {
           method: 'GET',
           credentials: 'include',
-          
+           headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${Cookie.get('sid')}` 
+          }
         });
+
 
         const data = await res.json();
 
