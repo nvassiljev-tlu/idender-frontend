@@ -19,14 +19,13 @@ import {
 
 export default function IdeaPage() {
   const [title, setTitle] = useState("");
-  const [tags, setTags] = useState<number[]>([]); // Массив ID категорий
+  const [tags, setTags] = useState<number[]>([]);
   const [description, setDescription] = useState("");
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
-  const [categories, setCategories] = useState<{ id: number; name: string }[]>([]); // Храним id и name
+  const [categories, setCategories] = useState<{ id: number; name: string }[]>([]);
   const router = useRouter();
 
-  // Загрузка категорий с oauth
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -38,15 +37,13 @@ export default function IdeaPage() {
 
         const response = await fetch("http://37.27.182.28:3001/v1/ideas/categories", {
           method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
           credentials: "include",
         });
 
         if (response.ok) {
           const data = await response.json();
-          setCategories(data.payload); // Сохраняем полный объект { id, name }
+          setCategories(data.payload);
         } else {
           console.error("Failed to fetch categories:", response.status);
         }
@@ -63,7 +60,7 @@ export default function IdeaPage() {
       setTags((prevTags) =>
         prevTags.includes(selectedId)
           ? prevTags.filter((id) => id !== selectedId)
-          : [...prevTags, selectedId] 
+          : [...prevTags, selectedId]
       );
     }
   };
@@ -75,18 +72,16 @@ export default function IdeaPage() {
     if (!token) {
       alert("You must be logged in to submit an idea.");
       return;
-    } else {
-      const response = await fetch("http://37.27.182.28:3001/v1/oauth/me", {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        credentials: "include",
-      });
-      if (!response.ok) {
-        alert("You are not authorized.");
-        return;
-      }
+    }
+
+    const response = await fetch("http://37.27.182.28:3001/v1/oauth/me", {
+      method: "GET",
+      headers: { Authorization: `Bearer ${token}` },
+      credentials: "include",
+    });
+    if (!response.ok) {
+      alert("You are not authorized.");
+      return;
     }
 
     const ideaData = {
@@ -109,17 +104,32 @@ export default function IdeaPage() {
 
       if (response.ok) {
         const data = await response.json();
+        console.log("Full API Response:", JSON.stringify(data, null, 2)); // Детальная отладка
         setShowAlert(true);
-        setTimeout(() => {
-          setShowAlert(false);
-          router.push(`/ideapage/${data.id}`);
-        }, 3000);
+
+        // Извлечение ID с проверкой
+        let ideaId = data.payload?.idea?.id;
+        if (!ideaId) {
+          console.error("ID not found in payload.idea.id, checking alternatives:", data);
+          // Попытка найти ID в других частях ответа (если структура отличается)
+          ideaId = data.payload?.id || Object.values(data.payload || {}).find((item: any) => item?.id)?.id;
+        }
+
+        if (ideaId) {
+          router.push(`/authenticated/new_idea/${ideaId}`);
+        } else {
+          console.error("No valid ID found in API response:", data);
+          alert("Failed to get idea ID from API response. Check console for details.");
+        }
+
         setTitle("");
         setTags([]);
         setDescription("");
         setIsAnonymous(false);
       } else {
-        alert("Failed to submit idea.");
+        const errorData = await response.json();
+        console.error("Failed to submit idea:", errorData);
+        alert(`Failed to submit idea: ${errorData.errors?.error || "Unknown error"}`);
       }
     } catch (error) {
       console.error("Error:", error);
@@ -157,7 +167,6 @@ export default function IdeaPage() {
                 ))}
               </SelectContent>
             </Select>
-            {/* Отображение выбранных тегов (для визуальной обратной связи) */}
             <div className="mt-2">
               {tags.map((tagId) => {
                 const tagName = categories.find((cat) => cat.id === tagId)?.name;
@@ -188,19 +197,14 @@ export default function IdeaPage() {
             />
             <label className="text-sm font-light text-slate-700">Anonymous</label>
           </div>
-          <Button
-            type="submit"
-            className="w-full bg-slate-800 text-white hover:bg-slate-700 rounded-none"
-          >
+          <Button type="submit" className="w-full bg-slate-800 text-white hover:bg-slate-700 rounded-none">
             Create
           </Button>
         </form>
         {showAlert && (
           <Alert className="mt-4">
             <AlertTitle>Success</AlertTitle>
-            <AlertDescription>
-              Post created and sent for moderation!
-            </AlertDescription>
+            <AlertDescription>Post created and sent for moderation!</AlertDescription>
           </Alert>
         )}
       </div>

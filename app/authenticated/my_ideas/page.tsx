@@ -105,15 +105,16 @@ export default function MyIdeasPage() {
           <p className="text-center text-sm text-white">No ideas submitted yet.</p>
         )}
 
+
         {!loading && ideas.map((idea) => (
           <div key={idea.id} className="border border-slate-400 p-4 rounded bg-slate-700">
             <h2 className="text-lg font-semibold">{idea.title}</h2>
             <p className="text-sm text-slate-300 mb-2">{idea.description}</p>
-            <p className={`text-sm font-semibold ${idea.status === 'accepted' ? 'text-green-400' : 'text-red-400'}`}>
-              Status: {idea.status === 'accepted' ? '✅ Accepted' : '❌ Declined'}
+            <p className={`text-sm font-semibold ${idea.status === 3 ? 'text-green-400' : idea.status === 4 || idea.status === 5 ? 'text-red-400' : 'text-yellow-400'}`}>
+              Status: {statusMap[idea.status] || "Unknown"}
             </p>
           </div>
-        ))}
+      ))}
       </div>
     </div>
   );
