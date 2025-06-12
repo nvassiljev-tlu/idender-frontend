@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { CheckCircle, XCircle } from 'lucide-react';
+import { CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import Cookie from 'js-cookie';
 
 type Idea = {
@@ -16,19 +16,27 @@ export default function MyIdeasPage() {
   const [ideas, setIdeas] = useState<Idea[]>([]);
   const [error, setError] = useState('');
   const [userId, setUserId] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isFetchingIdeas, setIsFetchingIdeas] = useState(false);
 
-  // check if user is logged in
+  // Check if user is logged in
   useEffect(() => {
     const checkLogin = async () => {
       try {
+        const token = Cookie.get('sid');
+        if (!token) {
+          setError('You are not logged in.');
+          setIsLoading(false);
+          return;
+        }
+
         const res = await fetch('http://37.27.182.28:3001/v1/oauth/me', {
           method: 'GET',
           credentials: 'include',
-          headers: { 
+          headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${Cookie.get('sid')}` 
-          }
+            'Authorization': `Bearer ${token}`,
+          },
         });
 
         const data = await res.json();
@@ -36,34 +44,36 @@ export default function MyIdeasPage() {
         if (res.status === 200 && data.payload?.user?.id) {
           setUserId(data.payload.user.id);
         } else {
+          Cookie.remove('sid');
           setError('You are not logged in.');
-          setLoading(false);
         }
       } catch (err) {
         setError('Could not connect to server.');
-        console.log(err)
-        setLoading(false);
+        console.log(err);
+      } finally {
+        setIsLoading(false);
       }
     };
 
     checkLogin();
   }, []);
 
-  // load ideas if logged in
+  // Load ideas if logged in
   useEffect(() => {
     if (!userId) return;
 
     const fetchIdeas = async () => {
+      setIsFetchingIdeas(true);
       try {
+        const token = Cookie.get('sid');
         const res = await fetch(`http://37.27.182.28:3001/v1/users/${userId}/ideas`, {
           method: 'GET',
           credentials: 'include',
-           headers: { 
+          headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${Cookie.get('sid')}` 
-          }
+            'Authorization': `Bearer ${token}`,
+          },
         });
-
 
         const data = await res.json();
 
@@ -75,12 +85,20 @@ export default function MyIdeasPage() {
       } catch (err) {
         setError('Server connection failed.');
       } finally {
-        setLoading(false);
+        setIsFetchingIdeas(false);
       }
     };
 
     fetchIdeas();
   }, [userId]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-slate-500 flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-white" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col items-center justify-start min-h-screen bg-slate-500 text-white font-sans px-4 py-8">
@@ -97,24 +115,24 @@ export default function MyIdeasPage() {
           </Alert>
         )}
 
-        {loading && !error && (
+        {isFetchingIdeas && !error && (
           <p className="text-center text-sm text-white">Loading your ideas...</p>
         )}
 
-        {!loading && ideas.length === 0 && !error && (
+        {!isFetchingIdeas && ideas.length === 0 && !error && (
           <p className="text-center text-sm text-white">No ideas submitted yet.</p>
         )}
 
 
-        {!loading && ideas.map((idea) => (
+        {!isLoading && ideas.map((idea) => (
           <div key={idea.id} className="border border-slate-400 p-4 rounded bg-slate-700">
             <h2 className="text-lg font-semibold">{idea.title}</h2>
             <p className="text-sm text-slate-300 mb-2">{idea.description}</p>
-            <p className={`text-sm font-semibold ${idea.status === 3 ? 'text-green-400' : idea.status === 4 || idea.status === 5 ? 'text-red-400' : 'text-yellow-400'}`}>
-              Status: {statusMap[idea.status] || "Unknown"}
+            <p className={`text-sm font-semibold ${idea.status === 'accepted' ? 'text-green-400' : 'text-red-400'}`}>
+              Status: {idea.status === 'accepted' ? '✅ Accepted' : '❌ Declined'}
             </p>
           </div>
-      ))}
+        ))}
       </div>
     </div>
   );
