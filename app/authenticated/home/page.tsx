@@ -32,6 +32,14 @@ export default function IdenderDashboard() {
   ];
 
   // SVG icons from online
+
+  const VoteIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M9 12l2 2 4-4" />
+    <path d="M5 7c0-1.1.9-2 2-2h10a2 2 0 0 1 2 2v12H5V7z" />
+  </svg>
+  );
+
   const LogoutIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
@@ -114,7 +122,7 @@ return (
         </section>
 
         {/* news section */}
-        <section className="mb-20"> {/* Added margin-bottom for button space */}
+        <section className="mb-20"> {/* margin-bottom for button space */}
           <div className="flex items-center gap-2 mb-4">
             <NewspaperIcon/>
             <h2 className="text-xl font-semibold text-slate-800">News</h2>
@@ -134,16 +142,22 @@ return (
         </section>
       </main>
 
-      {/* Centered Create Idea Button */}
-      <div className="fixed bottom-6 left-0 right-0 flex justify-center z-20">
-        <button
-          onClick={handleCreateIdea}
-          className="flex items-center gap-2 bg-slate-800 text-white px-6 py-3 rounded-full shadow-lg hover:bg-slate-700 transition-colors"
-          aria-label="Create new idea"
-        >
-          <PlusIcon />
-          <span>Create idea</span>
-        </button>
+      {/* create idea Button */}
+      <div className="fixed bottom-6 left-0 right-0 flex justify-center z-20 px-4">
+        <div className="flex gap-4 md:gap-8 w-full max-w-md">
+          <button
+            onClick={handleCreateIdea}
+            className="flex-1 flex items-center justify-center gap-2 bg-slate-800 text-white px-4 py-3 rounded-full shadow-lg hover:bg-slate-700 transition-colors">
+            <PlusIcon />
+            <span>Create idea</span>
+          </button>
+      {/* voting Button */}
+          <button onClick={() => router.push('/authenticated/voting')}
+            className="flex-1 flex items-center justify-center gap-2 bg-slate-700 text-white px-4 py-3 rounded-full shadow-lg hover:bg-slate-600 transition-colors">
+            <VoteIcon />
+            <span>Voting</span>
+          </button>
+        </div>
       </div>
 
       {/* mobilefriendlier-ish bottom padding */}
