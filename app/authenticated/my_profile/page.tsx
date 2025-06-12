@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { CheckCircle } from 'lucide-react';
+import { CheckCircle, Loader2 } from 'lucide-react';
 import Cookie from 'js-cookie';
 
 const languages = [
@@ -21,32 +21,39 @@ export default function ProfilePage() {
   const [selectedLang, setSelectedLang] = useState('en');
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [showAlert, setShowAlert] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // 
+  // Load saved language
   useEffect(() => {
     const savedLang = Cookies.get('preferredLanguage');
     if (savedLang) setSelectedLang(savedLang);
   }, []);
 
-  // 
+  // Check session and fetch user data
   useEffect(() => {
     async function fetchUser() {
       try {
+        const token = Cookie.get('sid');
+        if (!token) {
+          router.push('/login');
+          return;
+        }
+
         const res = await fetch('http://37.27.182.28:3001/v1/oauth/me', {
-          credentials: 'include', 
-          headers: { 
+          credentials: 'include',
+          headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${Cookie.get('sid')}` 
-          }
+            'Authorization': `Bearer ${token}`,
+          },
         });
 
         if (!res.ok) {
-          throw new Error('Failed to fetch user data');
+          Cookie.remove('sid');
+          router.push('/login');
+          return;
         }
 
         const json = await res.json();
-
-       
         const userData = json.payload.user || null;
 
         if (userData) {
@@ -58,14 +65,18 @@ export default function ProfilePage() {
         }
       } catch (err) {
         console.error('Error fetching user:', err);
+        Cookie.remove('sid');
+        router.push('/login');
+      } finally {
+        setIsLoading(false);
       }
     }
 
     fetchUser();
-  }, []);
+  }, [router]);
 
   const handleUpdate = () => {
-    Cookies.set('preferredLanguage', selectedLang, { expires: 365 * 100 }); // 100 aastat
+    Cookies.set('preferredLanguage', selectedLang, { expires: 365 * 100 }); // 100 years
     setShowAlert(true);
     setTimeout(() => setShowAlert(false), 3000);
   };
@@ -76,6 +87,14 @@ export default function ProfilePage() {
       setPreviewUrl(URL.createObjectURL(file));
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-slate-500 flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-white" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-slate-500 text-white font-sans px-4">
@@ -137,7 +156,7 @@ export default function ProfilePage() {
         </Button>
 
         <Button
-          onClick={() => router.push('/authenticated/home')} // если есть страница homepage
+          onClick={() => router.push('/authenticated/home')}
           className="w-full bg-slate-700 text-white hover:bg-slate-800 rounded-none"
         >
           Back to Home

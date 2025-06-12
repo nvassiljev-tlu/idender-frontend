@@ -4,6 +4,8 @@ import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import clsx from 'clsx';
 import { Button } from '@/components/ui/button';
+import Cookie from 'js-cookie';
+import { Loader2 } from 'lucide-react';
 
 type Idea = {
   id: string;
@@ -13,9 +15,9 @@ type Idea = {
 
 export default function VotingPage() {
   const router = useRouter();
-
   const [idea, setIdea] = useState<Idea | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true); // Для проверки сессии
+  const [isFetchingIdea, setIsFetchingIdea] = useState(false); // Для загрузки идеи
 
   const cardRef = useRef<HTMLDivElement | null>(null);
   const startX = useRef<number | null>(null);
@@ -23,111 +25,193 @@ export default function VotingPage() {
   const [offsetX, setOffsetX] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
 
-  useEffect(() => {
-    const fetchIdea = async () => {
-      setLoading(true);
-      try {
-        const res = await fetch('http://37.27.182.28:3001/v1/voting');
-        if (!res.ok) throw new Error('Failed to load idea');
-        const data = await res.json();
-        setIdea(data);
-      } catch (err) {
-        console.error('Failed to load idea:', err);
-        setIdea(null);
-      } finally {
-        setLoading(false);
-        resetCard();
-      }
-    };
-
-    fetchIdea();
-  }, []);
-// Reset card position and dragging state
   const resetCard = () => {
     setOffsetX(0);
     setIsDragging(false);
   };
-// Start swipe gesture
+
+  // Проверка сессии
+  useEffect(() => {
+    const MINIMUM_LOADING_TIME = 500; // 500ms minimum loading time
+
+    const checkSession = async () => {
+      const startTime = Date.now();
+      try {
+        const token = Cookie.get('sid');
+        if (!token) {
+          router.push('/login');
+          return;
+        }
+
+        const sessionResponse = await fetch('http://37.27.182.28:3001/v1/oauth/me', {
+          method: 'GET',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        if (!sessionResponse.ok) {
+          Cookie.remove('sid');
+          router.push('/login');
+          return;
+        }
+      } catch (err) {
+        console.error('Error checking session:', err);
+        Cookie.remove('sid');
+        router.push('/login');
+      } finally {
+        const elapsedTime = Date.now() - startTime;
+        const remainingTime = MINIMUM_LOADING_TIME - elapsedTime;
+        if (remainingTime > 0) {
+          setTimeout(() => setIsLoading(false), remainingTime);
+        } else {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    checkSession();
+  }, [router]);
+
+  // Загрузка идеи
+  const fetchIdea = async () => {
+    setIsFetchingIdea(true);
+    try {
+      const token = Cookie.get('sid');
+      const res = await fetch('http://37.27.182.28:3001/v1/voting', {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      if (!res.ok) throw new Error('Failed to load idea');
+      const data = await res.json();
+
+      if (data.status === 'OPERATION-OK' && data.payload) {
+        setIdea(data.payload);
+      } else {
+        setIdea(null);
+      }
+    } catch (err) {
+      console.error('Failed to load idea:', err);
+      setIdea(null);
+    } finally {
+      setIsFetchingIdea(false);
+      resetCard();
+    }
+  };
+
+  useEffect(() => {
+    if (isLoading) return; // Ждём завершения проверки сессии
+    fetchIdea();
+  }, [isLoading]);
+
   const handlePointerDown = (e: React.PointerEvent) => {
     startX.current = e.clientX;
     setIsDragging(true);
   };
-// Update card position during swipe
+
   const handlePointerMove = (e: React.PointerEvent) => {
     if (!isDragging || startX.current === null) return;
     currentX.current = e.clientX;
     const deltaX = currentX.current - startX.current;
     setOffsetX(deltaX);
   };
-  // Handle end of swipe gesture
+
   const handlePointerUp = () => {
     if (startX.current === null) return;
 
     const deltaX = currentX.current - startX.current;
-    const threshold = 100; // Minimum distance to trigger a vote
+    const threshold = 100;
 
     if (deltaX > threshold) {
       submitVote('like');
     } else if (deltaX < -threshold) {
       submitVote('dislike');
     } else {
-      resetCard(); // Not enough movement, reset
+      resetCard();
     }
 
     startX.current = null;
   };
-  // Submit vote to the backend and fetch next idea
 
   const submitVote = async (vote: 'like' | 'dislike') => {
     if (!idea) return;
 
     setIsDragging(false);
     setOffsetX(0);
-    setLoading(true);
+    setIsFetchingIdea(true);
 
     try {
+      const token = Cookie.get('sid');
       const res = await fetch(`http://37.27.182.28:3001/v1/voting/${idea.id}`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
         body: JSON.stringify({ vote }),
       });
       if (!res.ok) throw new Error('Failed to submit vote');
-      const nextIdea = await res.json();
-      setIdea(nextIdea || null);
+      const data = await res.json();
+
+      if (data.status === 'OPERATION-OK' && data.payload) {
+        setIdea(data.payload);
+      } else {
+        setIdea(null);
+      }
     } catch (err) {
       console.error('Failed to submit vote:', err);
       setIdea(null);
     } finally {
-      setLoading(false);
+      setIsFetchingIdea(false);
       resetCard();
     }
   };
-  // Calculate overlay opacity based on swipe distance
 
   const maxOffset = 150;
   const overlayOpacity = Math.min(Math.abs(offsetX) / maxOffset, 1) * 0.3;
 
-  if (loading) {
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-slate-500 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-2">
+          <Loader2 className="h-8 w-8 animate-spin text-white" />
+          <p className="text-sm text-white">Checking authentication...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (isFetchingIdea) {
     return (
       <div className="min-h-screen bg-slate-500 flex flex-col justify-center items-center text-white px-4">
         <div className="absolute top-4 left-4">
           <h1 className="text-xl font-bold">IDENDER</h1>
         </div>
-        <div className="text-base mt-10">Loading...</div>
+        <div className="flex flex-col items-center gap-2 mt-10">
+          <Loader2 className="h-8 w-8 animate-spin text-white" />
+          <p className="text-base">Loading idea...</p>
+        </div>
       </div>
     );
   }
-  // Show message if there are no more ideas
+
   if (!idea) {
     return (
       <div className="min-h-screen bg-slate-500 flex flex-col justify-center items-center text-white px-4">
-        <div className="absolute top-10 left-25">
+        <div className="absolute top-10 left-1/2 transform -translate-x-1/2">
           <h1 className="text-xl font-bold">IDENDER</h1>
         </div>
         <div className="text-base mt-10 text-center">No more ideas to vote on!</div>
         <Button
           className="mt-6 w-40 rounded-none bg-white text-slate-700 hover:bg-slate-200"
-          onClick={() => router.push('/home')}
+          onClick={() => router.push('/authenticated/home')}
         >
           Go to Homepage
         </Button>
@@ -159,7 +243,6 @@ export default function VotingPage() {
           }
         )}
       >
-        {/* Overlay for swipe feedback */}
         <div
           className="absolute top-0 left-0 w-full h-full rounded-2xl pointer-events-none z-0"
           style={{ backgroundColor: `rgba(0,0,0,${overlayOpacity})` }}
@@ -170,7 +253,7 @@ export default function VotingPage() {
           <p className="text-gray-800 text-base sm:text-lg">{idea.description}</p>
         </div>
       </div>
-    {/* Swipe instructions */}
+
       <div className="text-sm text-gray-400 mt-4 select-none">
         Swipe left — 👎 | Swipe right — 👍
       </div>
