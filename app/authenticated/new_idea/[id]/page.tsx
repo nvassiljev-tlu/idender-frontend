@@ -9,7 +9,7 @@ import {
   AlertTitle,
 } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Trash2 } from "lucide-react";
+import { Trash2, Loader2 } from "lucide-react"; // добавлен Loader2
 
 type Idea = {
   id: string;
@@ -64,7 +64,6 @@ export default function IdeaDetailPage() {
           return;
         }
 
-        
         const ideaResponse = await fetch(`http://37.27.182.28:3001/v1/ideas/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
           credentials: "include",
@@ -73,11 +72,13 @@ export default function IdeaDetailPage() {
           const data = await ideaResponse.json();
           setIdea(data.payload.idea || { id, title: "Sample Idea", description: "Sample description", status: 0, categories: [] });
           setIsAdmin(data.payload.is_admin || false); 
+          if (!data.payload.idea?.id) {
+            console.error("ID not found in payload.idea.id, checking alternatives:", data);
+          }
         } else {
           setError("Failed to load idea.");
         }
 
-        
         const commentsResponse = await fetch(`http://37.27.182.28:3001/v1/ideas/${id}/comments`, {
           headers: { Authorization: `Bearer ${token}` },
           credentials: "include",
@@ -99,7 +100,6 @@ export default function IdeaDetailPage() {
           console.error("Failed to fetch comments:", await commentsResponse.json());
         }
 
-        
         const userResponse = await fetch("http://37.27.182.28:3001/v1/oauth/me", {
           headers: { Authorization: `Bearer ${token}` },
           credentials: "include",
@@ -211,7 +211,11 @@ export default function IdeaDetailPage() {
   }
 
   if (loading) {
-    return <div className="min-h-screen bg-slate-500 flex items-center justify-center text-white">Loading...</div>;
+    return (
+      <div className="min-h-screen bg-slate-500 flex items-center justify-center">
+        <Loader2 className="w-10 h-10 text-white animate-spin" />
+      </div>
+    );
   }
 
   return (

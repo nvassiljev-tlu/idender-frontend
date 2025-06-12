@@ -16,6 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Loader2 } from "lucide-react"; //  Добавлено
 
 export default function IdeaPage() {
   const [title, setTitle] = useState("");
@@ -24,6 +25,7 @@ export default function IdeaPage() {
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
   const [categories, setCategories] = useState<{ id: number; name: string }[]>([]);
+  const [isLoading, setIsLoading] = useState(true); //  Добавлено
   const router = useRouter();
 
   useEffect(() => {
@@ -49,6 +51,8 @@ export default function IdeaPage() {
         }
       } catch (error) {
         console.error("Error fetching categories:", error);
+      } finally {
+        setIsLoading(false); //  Устанавливаем загрузку в false
       }
     };
     fetchCategories();
@@ -110,7 +114,7 @@ export default function IdeaPage() {
         // Извлечение ID с проверкой
         let ideaId = data.payload?.idea?.id;
         if (!ideaId) {
-          console.error("ID not found in payload.idea.id, checking alternatives:", data);
+          console.error("ID not found in payload.idea.id, checking alternatives:", data); // 
           // Попытка найти ID в других частях ответа (если структура отличается)
           ideaId = data.payload?.id || Object.values(data.payload || {}).find((item: any) => item?.id)?.id;
         }
@@ -136,6 +140,15 @@ export default function IdeaPage() {
       alert("An error occurred.");
     }
   };
+
+  // 🔄 Показываем Loader2 пока isLoading === true
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-slate-500 flex items-center justify-center">
+        <Loader2 className="w-10 h-10 text-white animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-500 flex flex-col items-center justify-center p-4">
