@@ -32,10 +32,7 @@ export default function VotingPage() {
 
   // Проверка сессии
   useEffect(() => {
-    const MINIMUM_LOADING_TIME = 500; // 500ms minimum loading time
-
     const checkSession = async () => {
-      const startTime = Date.now();
       try {
         const token = Cookie.get('sid');
         if (!token) {
@@ -62,13 +59,7 @@ export default function VotingPage() {
         Cookie.remove('sid');
         router.push('/login');
       } finally {
-        const elapsedTime = Date.now() - startTime;
-        const remainingTime = MINIMUM_LOADING_TIME - elapsedTime;
-        if (remainingTime > 0) {
-          setTimeout(() => setIsLoading(false), remainingTime);
-        } else {
-          setIsLoading(false);
-        }
+        setIsLoading(false); // Убрана искусственная задержка
       }
     };
 
