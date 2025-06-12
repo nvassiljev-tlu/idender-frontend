@@ -5,7 +5,8 @@ import Cookie from 'js-cookie';
 import { useEffect, useRef, useState } from 'react';
 import { Loader2 } from 'lucide-react';
 
-// hovering submenu mousedown hook
+
+// profile submenu mousedown hook
 function useClickOutside(ref: React.RefObject<HTMLElement | null>, callback: () => void) {
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -25,44 +26,76 @@ export default function IdenderDashboard() {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const profileMenuRef = useRef<HTMLDivElement | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [news, setNews] = useState<Array<{
+    id: number;
+    title: string;
+    description: string;
+    created_at: string;
+  }>>([]);
+  const fetchNews = async () => {
+  try {
+    const token = Cookie.get('sid');
+    const res = await fetch('http://37.27.182.28:3001/v1/news', { // news endpoint
+      method: 'GET',
+      credentials: 'include',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}` 
+      }
+    });
+    
+    if (res.ok) {
+      const data = await res.json();
+      setNews(data);
+    } else {
+      console.error('Failed to fetch news');
+    }
+  } catch (err) {
+    console.error('Error fetching news:', err);
+  }
+};
 
   useClickOutside(profileMenuRef, () => setShowProfileMenu(false));
 
-  // check if user is logged in
-  useEffect(() => {
-    const token = Cookie.get('sid')
-    if (!token) {
-      router.push('/login')
-      return;
-    }
-    
-    const checkLogin = async () => {
-      try {
-        const res = await fetch('http://37.27.182.28:3001/v1/oauth/me', {
-          method: 'GET',
-          credentials: 'include',
-          headers: { 
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}` 
-          }
-        });
-        
-        if (res.status !== 200) {
-          Cookie.remove("sid")
-          router.push('/login')
-          return;
-        }
-      } catch (err) {
-        console.log(err)
-        Cookie.remove("sid")
-        router.push('/login')
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  // check if user is logged in, only fetch news if logged in
+ useEffect(() => {
+  const token = Cookie.get('sid');
+  if (!token) {
+    router.push('/login');
+    return;
+  }
 
-    checkLogin();
-  }, [router]);
+  const checkLogin = async () => {
+    try {
+      const res = await fetch('http://37.27.182.28:3001/v1/oauth/me', {
+        method: 'GET',
+        credentials: 'include',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}` 
+        }
+      });
+      
+      if (res.status !== 200) {
+        Cookie.remove("sid");
+        router.push('/login');
+        return;
+      }
+      
+      // only fetch news if login check succeeds
+      await fetchNews();
+    } catch (err) {
+      console.log(err);
+      Cookie.remove("sid");
+      router.push('/login');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  checkLogin();
+}, [router]);
 
   const handleLogout = () => {
     Cookie.remove('sid');
@@ -73,13 +106,14 @@ export default function IdenderDashboard() {
     router.push('/authenticated/new_idea');
   };
 
-  // mock data - replace with actual data fetching
+  /* mock data - replace with actual data fetching
   const news = [
     { id: 1, title: 'Student wins Sudoku award', date: 'May 15, 2025' },
     { id: 2, title: 'Proposed idea to "shut down the cafeteria" has been approved by the school board', date: 'May 25, 2025' },
     { id: 3, title: 'School cafeteria permanently shut down', date: 'June 1, 2025' },
     { id: 4, title: 'Malnourishment in Tallinn French Lyceum hit record levels', date: 'June 2, 2025'}
   ];
+*/
 
   // SVG icons from online
   const VoteIcon = () => (
@@ -129,9 +163,9 @@ export default function IdenderDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-100 text-slate-800 flex flex-col">
+    <div className="min-h-screen bg-slate-100 text-slate-800 flex flex-col min-w-[320px]">
       {/* header */}
-      <header className="bg-slate-800 text-white p-4 flex justify-between items-center sticky top-0 z-10">
+      <header className="bg-slate-800 text-white p-4 flex justify-between items-center sticky top-0 z-10 w-full">
         <button 
           onClick={handleLogout}
           className="flex items-center gap-2 hover:text-slate-300 transition-colors"
@@ -175,40 +209,57 @@ export default function IdenderDashboard() {
               >
                 My Ideas
               </button>
-              <button
-                onClick={() => {
-                  setShowProfileMenu(false);
-                  router.push('/authenticated/settings');
-                }}
-                className="block w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-100"
-              >
-                Settings
-              </button>
             </div>
           )}
         </div>
       </header>
 
       {/* main content */}
-      <main className="container mx-auto p-4 flex-1 overflow-y-auto pt-16" onClick={() => showProfileMenu && setShowProfileMenu(false)}>
+      <main className="w-full max-w-6xl mx-auto p-4 flex-1 overflow-y-auto pt-16 min-w-[320px]" onClick={() => showProfileMenu && setShowProfileMenu(false)}>
         {/* news section */}
-        <section className="mb-20">
+        <section className="mb-20 w-full max-w-5xl min-w-[320px] sm:min-w-[600px] mx-auto"> {/* page content minimum px width */}
           <div className="flex items-center gap-2 mb-4">
             <NewspaperIcon/>
             <h2 className="text-xl font-bold text-slate-800">News</h2>
           </div>
           
-          <div className="grid gap-4">
-            {news.map(item => (
-              <div 
-                key={item.id}
-                className="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow"
-              >
-                <h3 className="font-medium text-slate-800">{item.title}</h3>
-                <p className="text-sm text-slate-500 mt-1">{item.date}</p>
+          {error && (
+            <div className="mb-4 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 w-full">
+              {/* error message remains full width */}
+            </div>
+          )}
+
+          {news.length === 0 ? (
+            <div className="grid grid-cols-1 gap-4 w-full min-w-[320px]">
+              <div className="bg-white p-6 rounded-lg shadow-sm text-center min-h-[150px] flex flex-col justify-center items-center">
+                <p className="text-slate-500 mb-2">No news articles found</p>
+                <button 
+                  onClick={fetchNews}
+                  className="text-blue-600 hover:text-blue-800 text-sm"
+                >
+                  Refresh
+                </button>
               </div>
-            ))}
-          </div>
+            </div>
+        ) : (
+            <div className="grid gap-4 w-full">
+              {news.map(item => (
+                <div 
+                  key={item.id}
+                  className="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow"
+                >
+                  <h3 className="font-medium text-slate-800">{item.title}</h3>
+                  <p className="text-sm text-slate-500 mt-1">
+                    {new Date(item.created_at).toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric'
+                    })}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
         </section>
       </main>
 
