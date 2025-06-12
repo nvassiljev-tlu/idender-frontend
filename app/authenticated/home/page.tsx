@@ -2,8 +2,8 @@
 
 import { useRouter } from 'next/navigation';
 import Cookie from 'js-cookie';
-import { useEffect, useRef } from 'react';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { Loader2 } from 'lucide-react';
 
 // hovering submenu mousedown hook
 function useClickOutside(ref: React.RefObject<HTMLElement | null>, callback: () => void) {
@@ -23,47 +23,54 @@ function useClickOutside(ref: React.RefObject<HTMLElement | null>, callback: () 
 export default function IdenderDashboard() {
   const router = useRouter();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const profileMenuRef = useRef<HTMLDivElement | null>(null);
 
   useClickOutside(profileMenuRef, () => setShowProfileMenu(false));
 
   // check if user is logged in
-    useEffect(() => {
-      const token = Cookie.get('sid')
-      if (!token) {
-        router.push('/login')
-      }
-      const checkLogin = async () => {
-        try {
-          const res = await fetch('http://37.27.182.28:3001/v1/oauth/me', {
-            method: 'GET',
-            credentials: 'include',
-            headers: { 
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}` 
-            }
-          });
-          
-          if (res.status !== 200) {
-            Cookie.remove("sid")
-            router.push('/login')
+  useEffect(() => {
+    const token = Cookie.get('sid')
+    if (!token) {
+      router.push('/login')
+      return;
+    }
+    
+    const checkLogin = async () => {
+      try {
+        const res = await fetch('http://37.27.182.28:3001/v1/oauth/me', {
+          method: 'GET',
+          credentials: 'include',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}` 
           }
-        } catch (err) {
-          console.log(err)
+        });
+        
+        if (res.status !== 200) {
+          Cookie.remove("sid")
+          router.push('/login')
+          return;
         }
-      };
-  
-      checkLogin();
-    }, []);
+      } catch (err) {
+        console.log(err)
+        Cookie.remove("sid")
+        router.push('/login')
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkLogin();
+  }, [router]);
 
   const handleLogout = () => {
-    //logout logic here
-    Cookie.remove('sid'); // remove session cookie
+    Cookie.remove('sid');
     router.push('/login');
   };
 
   const handleCreateIdea = () => {
-    router.push('/authenticated/new_idea'); // go to idea page
+    router.push('/authenticated/new_idea');
   };
 
   // mock data - replace with actual data fetching
@@ -75,12 +82,11 @@ export default function IdenderDashboard() {
   ];
 
   // SVG icons from online
-
   const VoteIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M9 12l2 2 4-4" />
-    <path d="M5 7c0-1.1.9-2 2-2h10a2 2 0 0 1 2 2v12H5V7z" />
-  </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M9 12l2 2 4-4" />
+      <path d="M5 7c0-1.1.9-2 2-2h10a2 2 0 0 1 2 2v12H5V7z" />
+    </svg>
   );
 
   const LogoutIcon = () => (
@@ -113,8 +119,16 @@ export default function IdenderDashboard() {
       <line x1="5" y1="12" x2="19" y2="12"></line>
     </svg>
   );
-  
-return (
+
+  if (isLoading) {
+    return (
+      <div className="fixed inset-0 bg-slate-500 flex items-center justify-center z-50">
+        <Loader2 className="h-8 w-8 animate-spin text-white" />
+      </div>
+    );
+  }
+
+  return (
     <div className="min-h-screen bg-slate-100 text-slate-800 flex flex-col">
       {/* header */}
       <header className="bg-slate-800 text-white p-4 flex justify-between items-center sticky top-0 z-10">
@@ -173,13 +187,12 @@ return (
             </div>
           )}
         </div>
-
       </header>
 
       {/* main content */}
       <main className="container mx-auto p-4 flex-1 overflow-y-auto pt-16" onClick={() => showProfileMenu && setShowProfileMenu(false)}>
         {/* news section */}
-        <section className="mb-20"> {/* margin-bottom for button space */}
+        <section className="mb-20">
           <div className="flex items-center gap-2 mb-4">
             <NewspaperIcon/>
             <h2 className="text-xl font-bold text-slate-800">News</h2>
@@ -208,7 +221,7 @@ return (
             <PlusIcon />
             <span>Create idea</span>
           </button>
-      {/* voting Button */}
+          {/* voting Button */}
           <button onClick={() => router.push('/authenticated/voting')}
             className="flex-1 flex items-center justify-center gap-2 bg-slate-700 text-white px-4 py-3 rounded-full shadow-lg hover:bg-slate-600 transition-colors">
             <VoteIcon />
