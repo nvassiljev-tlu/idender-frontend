@@ -3,11 +3,13 @@
 import React, { useEffect, useState } from 'react';
 import Cookies from 'js-cookie';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { CheckCircle, Loader2 } from 'lucide-react';
-import Cookie from 'js-cookie';
+import { useTranslation } from 'react-i18next';
+import i18n from '../../../i18n/client';
+import axios from 'axios';
 
 const languages = [
   { code: 'en', label: 'English' },
@@ -17,55 +19,53 @@ const languages = [
 
 export default function ProfilePage() {
   const router = useRouter();
-  const [user, setUser] = useState({ firstName: '', lastName: '', email: '' });
+  const params = useParams();
+  const { t } = useTranslation('common');
+
+  const [user, setUser] = useState({ id: '', firstName: '', lastName: '', email: '' });
   const [selectedLang, setSelectedLang] = useState('en');
+  const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [showAlert, setShowAlert] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [lang, setLang] = useState('');
 
-  // Load saved language
   useEffect(() => {
-    const savedLang = Cookies.get('preferredLanguage');
-    if (savedLang) setSelectedLang(savedLang);
-  }, []);
+    const language = typeof params.lang === 'string' ? params.lang : Array.isArray(params.lang) ? params.lang[0] : 'et';
+    i18n.changeLanguage(language);
+    Cookies.set('lang', language);
+    setLang(language);
+  }, [params.lang]);
 
-  // Check session and fetch user data
   useEffect(() => {
     async function fetchUser() {
-      try {
-        const token = Cookie.get('sid');
-        if (!token) {
-          router.push('/login');
-          return;
-        }
+      const token = Cookies.get('sid');
+      if (!token) {
+        router.push('/login');
+        return;
+      }
 
-        const res = await fetch('http://37.27.182.28:3001/v1/oauth/me', {
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
+      try {
+        const res = await axios.get('http://37.27.182.28:3001/v1/oauth/me', {
+          headers: { Authorization: `Bearer ${token}` },
+          withCredentials: true,
         });
 
-        if (!res.ok) {
-          Cookie.remove('sid');
-          router.push('/login');
-          return;
-        }
+        const u = res.data.payload.user;
+        setUser({
+          id: u.id,
+          firstName: u.first_name || '',
+          lastName: u.last_name || '',
+          email: u.email || '',
+        });
 
-        const json = await res.json();
-        const userData = json.payload.user || null;
-
-        if (userData) {
-          setUser({
-            firstName: userData.first_name || '',
-            lastName: userData.last_name || '',
-            email: userData.email || '',
-          });
+        if (u.preferred_language) {
+          setSelectedLang(u.preferred_language);
+          i18n.changeLanguage(u.preferred_language);
         }
-      } catch (err) {
-        console.error('Error fetching user:', err);
-        Cookie.remove('sid');
+      } catch (error) {
+        console.error('Error fetching user:', error);
+        Cookies.remove('sid');
         router.push('/login');
       } finally {
         setIsLoading(false);
@@ -75,16 +75,41 @@ export default function ProfilePage() {
     fetchUser();
   }, [router]);
 
-  const handleUpdate = () => {
-    Cookies.set('preferredLanguage', selectedLang, { expires: 365 * 100 }); // 100 years
-    setShowAlert(true);
-    setTimeout(() => setShowAlert(false), 3000);
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0];
+    if (selectedFile) {
+      setFile(selectedFile);
+      setPreviewUrl(URL.createObjectURL(selectedFile));
+    }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setPreviewUrl(URL.createObjectURL(file));
+  const handleUpdate = async () => {
+    const token = Cookies.get('sid');
+    if (!token) return;
+
+    try {
+      const formData = new FormData();
+      formData.append('preferred_language', selectedLang);
+      if (file) formData.append('profile_picture', file);
+
+      const res = await axios.patch(
+        `http://37.27.182.28:3001/v1/users/${user.id}`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          withCredentials: true,
+        }
+      );
+
+      console.log('Update response:', res.data);
+      Cookies.set('lang', selectedLang);
+      i18n.changeLanguage(selectedLang);
+      setShowAlert(true);
+      setTimeout(() => setShowAlert(false), 3000);
+    } catch (error) {
+      console.error('Failed to update profile:', error);
     }
   };
 
@@ -98,39 +123,39 @@ export default function ProfilePage() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-slate-500 text-white font-sans px-4">
-      <h1 className="text-2xl font-bold mb-6">My Profile</h1>
+      <h1 className="text-2xl font-bold mb-6">{t('myProfile')}</h1>
 
       <div className="bg-slate-600 text-white p-6 rounded-lg shadow w-full max-w-sm space-y-4">
         {showAlert && (
           <Alert className="mb-4 border-green-500 bg-green-100 text-green-700">
             <CheckCircle className="h-5 w-5 text-green-600" />
             <div>
-              <AlertTitle>Success</AlertTitle>
-              <AlertDescription>Your data has been successfully updated</AlertDescription>
+              <AlertTitle>{t('success')}</AlertTitle>
+              <AlertDescription>{t('updateSuccess')}</AlertDescription>
             </div>
           </Alert>
         )}
 
-        <TextField label="Full Name" value={`${user.firstName} ${user.lastName}`} readOnly />
-        <TextField label="Email" value={user.email} readOnly />
+        <TextField label={t('fullName')} value={`${user.firstName} ${user.lastName}`} />
+        <TextField label={t('email')} value={user.email} />
 
         <div>
-          <label className="block text-sm mb-1">Preferred Language</label>
+          <label className="block text-sm mb-1">{t('preferredLanguage')}</label>
           <select
             className="w-full p-2 border border-slate-400 bg-slate-700 text-white rounded text-sm"
             value={selectedLang}
             onChange={(e) => setSelectedLang(e.target.value)}
           >
-            {languages.map((lang) => (
-              <option key={lang.code} value={lang.code}>
-                {lang.label}
+            {languages.map((l) => (
+              <option key={l.code} value={l.code}>
+                {l.label}
               </option>
             ))}
           </select>
         </div>
 
         <div>
-          <label className="block text-sm mb-1">Profile Picture</label>
+          <label className="block text-sm mb-1">{t('profilePicture')}</label>
           <input
             type="file"
             accept="image/png"
@@ -148,32 +173,26 @@ export default function ProfilePage() {
           )}
         </div>
 
-        <Button
-          onClick={handleUpdate}
-          className="w-full bg-white text-slate-700 hover:bg-slate-300 rounded-none"
-        >
-          Update
+        <Button onClick={handleUpdate} className="w-full bg-white text-slate-700 hover:bg-slate-300 rounded-none">
+          {t('updateBtn')}
         </Button>
 
-        <Button
-          onClick={() => router.push('/authenticated/home')}
-          className="w-full bg-slate-700 text-white hover:bg-slate-800 rounded-none"
-        >
-          Back to Home
+        <Button onClick={() => router.push(`/${lang}/a/home`)} className="w-full bg-slate-700 text-white hover:bg-slate-800 rounded-none">
+          {t('backToHome')}
         </Button>
       </div>
     </div>
   );
 }
 
-function TextField({ label, value, readOnly = false }: { label: string; value: string; readOnly?: boolean }) {
+function TextField({ label, value }: { label: string; value: string }) {
   return (
     <div>
       <label className="block text-sm mb-1">{label}</label>
       <input
         type="text"
         value={value}
-        readOnly={readOnly}
+        readOnly
         className="w-full p-2 border border-slate-400 bg-slate-700 text-white rounded text-sm"
       />
     </div>
