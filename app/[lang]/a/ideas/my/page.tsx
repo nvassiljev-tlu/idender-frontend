@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { useRouter } from 'next/navigation';
 import { CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import Cookie from 'js-cookie';
 
@@ -13,6 +14,8 @@ type Idea = {
 };
 
 export default function MyIdeasPage() {
+  const router = useRouter();
+  const [lang, setLang] = useState("");
   const [ideas, setIdeas] = useState<Idea[]>([]);
   const [error, setError] = useState('');
   const [userId, setUserId] = useState<string | null>(null);
@@ -91,6 +94,11 @@ export default function MyIdeasPage() {
 
     fetchIdeas();
   }, [userId]);
+  
+  const handleIdeaClick = (ideaId: string) => {
+    const language = Cookie.get("lang") || "et";
+    router.push(`/${language}/a/ideas/${ideaId}`);
+  };
 
   if (isLoading) {
     return (
@@ -125,7 +133,10 @@ export default function MyIdeasPage() {
 
 
         {!isLoading && ideas.map((idea) => (
-          <div key={idea.id} className="border border-slate-400 p-4 rounded bg-slate-700">
+          <div 
+            key={idea.id} 
+            onClick={() => handleIdeaClick(idea.id)}
+            className="border border-slate-400 p-4 rounded bg-slate-700 cursor-pointer hover:bg-slate-600 transition-colors">
             <h2 className="text-lg font-semibold">{idea.title}</h2>
             <p className="text-sm text-slate-300 mb-2">{idea.description}</p>
             <p className={`text-sm font-semibold ${idea.status === 'accepted' ? 'text-green-400' : 'text-red-400'}`}>
