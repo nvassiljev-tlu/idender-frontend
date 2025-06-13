@@ -41,7 +41,7 @@ export default function LoginPage() {
 
         const data = await res.json();
         if (res.status === 200 && data.payload?.user?.id) {
-          router.push('/authenticated/home');
+          router.push(`/${lang}/a/home`);
         } else {
           setLoading(false);
         }
@@ -59,7 +59,7 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center">
       <div className="bg-white backdrop-blur-sm p-6 rounded-xl shadow-lg max-w-md w-full">
         <h1 className="text-4xl sm:text-6xl md:text-5xl font-bold text-slate-700 text-center">
-          {t('loginTitle')}
+          {t('appTitle')}
         </h1>
         <LoginForm />
         {error && <p className="text-red-500 mt-2 text-sm">{error}</p>}
