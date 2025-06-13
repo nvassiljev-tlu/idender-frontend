@@ -1,11 +1,12 @@
-"use client"
+'use client'
 
+import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
-import { Button } from "@/components/ui/button"
 import Cookie from "js-cookie"
+import { useState } from "react"
 import {
   Form,
   FormControl,
@@ -15,8 +16,6 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { useRouter } from "next/navigation"
-import { useState } from "react"
 
 const formSchema = z.object({
   email: z.string().email(),
@@ -26,7 +25,9 @@ const formSchema = z.object({
 export function LoginForm() {
   const [error, setError] = useState("")
   const router = useRouter()
-  
+  const params = useParams()
+  const lang = typeof params.lang === "string" ? params.lang : "et"
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -48,7 +49,6 @@ export function LoginForm() {
       const data = await response.json()
 
       if (response.ok) {
-        // Login successful - redirect or set user state
         Cookie.set("sid", data.payload.data.session)
         Cookie.set("lang", data.payload.data.language)
         router.push(`/${data.payload.data.language}/a/home`)
@@ -70,7 +70,12 @@ export function LoginForm() {
             <FormItem className="mb-0">
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input placeholder="Email" className="text-slate-900 h-auto w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-slate-700" required {...field} />
+                <Input
+                  placeholder="Email"
+                  className="text-slate-900 h-auto w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-slate-700"
+                  required
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -83,27 +88,39 @@ export function LoginForm() {
             <FormItem className="mb-8">
               <FormLabel>Password</FormLabel>
               <FormControl>
-                <Input type="password" placeholder="Password" className="text-slate-900 h-auto w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-slate-700" required {...field} />
+                <Input
+                  type="password"
+                  placeholder="Password"
+                  className="text-slate-900 h-auto w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-slate-700"
+                  required
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        {error && <div className="text-red-500">{error}</div>}
-            <button
-                type="submit"
-                className="w-full bg-slate-800 text-white py-2 px-4 rounded hover:bg-slate-500 transition duration-200"
-            >
-            Log In
-            </button>
+        {error && <div className="text-red-500 mb-4">{error}</div>}
+        <button
+          type="submit"
+          className="w-full bg-slate-800 text-white py-2 px-4 rounded hover:bg-slate-500 transition duration-200"
+        >
+          Log In
+        </button>
       </form>
-        <div className="mt-4 text-center text-sm text-slate-600">
-          <a href="#" className="text-slate-700 hover:underline">Forgot password?</a>
-          <span className="mx-2">•</span>
-          <Link href="/et/signup" className="text-slate-700 hover:underline">Sign Up</Link>
-        </div>
+      <div className="mt-4 text-center text-sm text-slate-600">
+        <button
+          type="button"
+          onClick={() => router.push(`/${lang}/forgot-password`)}
+          className="text-slate-700 hover:underline"
+        >
+          Forgot password?
+        </button>
+        <span className="mx-2">•</span>
+        <Link href={`/${lang}/signup`} className="text-slate-700 hover:underline">
+          Sign Up
+        </Link>
+      </div>
     </Form>
-    
-    
   )
 }

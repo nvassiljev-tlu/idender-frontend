@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Cookie from "js-cookie";
@@ -8,8 +9,7 @@ import {
   AlertDescription,
   AlertTitle,
 } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
-import { Trash2, Loader2, Router } from "lucide-react"; 
+import { Trash2, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 type Idea = {
@@ -21,6 +21,8 @@ type Idea = {
   is_anonymus?: number;
   createdAt?: string;
   user_id?: string;
+  first_name?: string;
+  last_name?: string;
 };
 
 type Comment = {
@@ -43,8 +45,8 @@ export default function IdeaDetailPage() {
   const [voteCount, setVoteCount] = useState({ likes: 0, dislikes: 0 });
   const [isAdmin, setIsAdmin] = useState(false);
   const [newStatus, setNewStatus] = useState<number | null>(null);
-  const [loading, setLoading] = useState(true); // Loading state
-  const [lang, setLang] = useState(""); // Language state
+  const [loading, setLoading] = useState(true);
+  const [lang, setLang] = useState("");
   const router = useRouter();
 
   const statusMap = {
@@ -54,6 +56,15 @@ export default function IdeaDetailPage() {
     3: "Approved",
     4: "Declined (by School)",
     5: "Declined (Moderation)",
+  };
+
+  const getNextAllowedStatuses = (currentStatus: number) => {
+    switch (currentStatus) {
+      case 0: return [1, 5];
+      case 1: return [2];
+      case 2: return [3, 4];
+      default: return [];
+    }
   };
 
   useEffect(() => {
@@ -71,13 +82,18 @@ export default function IdeaDetailPage() {
           headers: { Authorization: `Bearer ${token}` },
           credentials: "include",
         });
+        
         if (ideaResponse.ok) {
           const data = await ideaResponse.json();
-          setIdea(data.payload.idea || { id, title: "Sample Idea", description: "Sample description", status: 0, categories: [] });
-          setIsAdmin(data.payload.is_admin || false); 
-          if (!data.payload.idea?.id) {
-            console.error("ID not found in payload.idea.id, checking alternatives:", data);
+          const ideaData = data.payload.idea;
+          
+          if (ideaData.is_anonymus === 1 && !data.payload.is_admin) {
+            ideaData.first_name = "Anonymous";
+            ideaData.last_name = "";
           }
+          
+          setIdea(ideaData || { id, title: "Sample Idea", description: "Sample description", status: 0, categories: [] });
+          setIsAdmin(data.payload.is_admin || false);
         } else {
           setError("Failed to load idea.");
         }
@@ -86,6 +102,7 @@ export default function IdeaDetailPage() {
           headers: { Authorization: `Bearer ${token}` },
           credentials: "include",
         });
+        
         if (commentsResponse.ok) {
           const data = await commentsResponse.json();
           const formattedComments = data.payload.map((c: any) => ({
@@ -99,24 +116,12 @@ export default function IdeaDetailPage() {
             last_name: c.last_name || "User",
           }));
           setComments(formattedComments);
-        } else {
-          console.error("Failed to fetch comments:", await commentsResponse.json());
         }
 
-        const userResponse = await fetch("http://37.27.182.28:3001/v1/oauth/me", {
-          headers: { Authorization: `Bearer ${token}` },
-          credentials: "include",
-        });
-        if (!userResponse.ok) {
-          console.error("Failed to fetch user data:", await userResponse.json());
-          setError("Failed to authenticate user.");
-          router.push("/et/login");
-        }
         const language = Cookie.get("lang") || "et";
         setLang(language);
       } catch (err) {
         setError("An error occurred while fetching data.");
-        console.error("Fetch error:", err);
       } finally {
         setLoading(false);
       }
@@ -135,6 +140,7 @@ export default function IdeaDetailPage() {
         credentials: "include",
         body: JSON.stringify({ content: newComment }),
       });
+      
       if (response.ok) {
         const data = await response.json();
         const newCommentData = data.payload[0];
@@ -152,9 +158,6 @@ export default function IdeaDetailPage() {
           },
         ]);
         setNewComment("");
-      } else {
-        const errorData = await response.json();
-        setError(`Failed to add comment: ${errorData.errors?.error || "Unknown error"}`);
       }
     } catch (err) {
       setError("An error occurred while adding comment.");
@@ -170,15 +173,14 @@ export default function IdeaDetailPage() {
         headers: { Authorization: `Bearer ${token}` },
         credentials: "include",
       });
+      
       if (response.ok) {
-        setComments(comments.filter((c) => c.id !== commentId));
-      } else {
-        setError("Failed to delete comment.");
-        console.error("Delete comment response:", await response.json());
+        setComments(comments.map(c => 
+          c.id === commentId ? { ...c, deleted_at: Date.now().toString() } : c
+        ));
       }
     } catch (err) {
       setError("An error occurred while deleting comment.");
-      console.error("Delete comment error:", err);
     }
   };
 
@@ -192,16 +194,13 @@ export default function IdeaDetailPage() {
         credentials: "include",
         body: JSON.stringify({ status: newStatus }),
       });
+      
       if (response.ok) {
         setIdea((prev) => (prev ? { ...prev, status: newStatus } : null));
         setNewStatus(null);
-      } else {
-        setError("Failed to update status.");
-        console.error("Update status response:", await response.json());
       }
     } catch (err) {
       setError("An error occurred while updating status.");
-      console.error("Update status error:", err);
     }
   };
 
@@ -226,62 +225,81 @@ export default function IdeaDetailPage() {
 
   return (
     <div className="min-h-screen bg-slate-500 flex flex-col items-center justify-start p-4 text-white">
-      <h1 className="text-2xl font-bold mb-4">{idea.title}</h1>
-      <p className="mb-4">{idea.description}</p>
-      <p className="mb-4">Status: {statusMap[idea.status]}</p>
-
-      {/* Comments */}
-      <div className="w-full max-w-2xl mb-4">
-        <h2 className="text-lg font-semibold mb-2">Comments</h2>
-        {comments.map((comment) => (
-          <div key={comment.id} className="bg-slate-600 p-3 rounded mb-2 flex justify-between items-start">
-            <p>
-              {comment.content} <span className="text-sm text-gray-400">by {comment.first_name} {comment.last_name}</span>
+      <h1 className="text-2xl font-bold mb-4">{idea?.title || 'Loading...'}</h1>
+      <p className="mb-4">{idea?.description || 'Loading description...'}</p>
+      
+      {idea && (
+        <>
+          <p className="mb-4">Status: {statusMap[idea.status]}</p>
+          
+          {idea.is_anonymus === 1 && isAdmin && (
+            <p className="mb-4 text-sm text-gray-400">
+              Submitted by: {idea.first_name} {idea.last_name} (ID: {idea.user_id})
             </p>
-            {isAdmin && (
-              <Button variant="destructive" size="icon" onClick={() => handleDeleteComment(comment.id)}>
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            )}
-          </div>
-        ))}
-        <div className="flex gap-2">
-          <input
-            type="text"
-            value={newComment}
-            onChange={(e) => setNewComment(e.target.value)}
-            placeholder="Add a comment..."
-            className="flex-1 p-2 bg-slate-700 text-white rounded"
-          />
-          <Button onClick={handleAddComment}>Add</Button>
-        </div>
-      </div>
+          )}
 
-      {/* Vote counter (only for admin) */}
-      {isAdmin && (
-        <div className="mb-4 bg-slate-600 p-3 rounded">
-          <h3 className="text-lg font-semibold">Voting Results (Admin Only)</h3>
-          <p>Likes: {voteCount.likes}</p>
-          <p>Dislikes: {voteCount.dislikes}</p>
-        </div>
-      )}
-
-      {/* Status change (only for admin) */}
-      {isAdmin && (
-        <div className="mb-4 bg-slate-600 p-3 rounded">
-          <h3 className="text-lg font-semibold">Change Status</h3>
-          <select
-            value={newStatus || ""}
-            onChange={(e) => setNewStatus(Number(e.target.value))}
-            className="p-2 bg-slate-700 text-white rounded"
-          >
-            <option value="">Select status</option>
-            {Object.entries(statusMap).map(([key, value]) => (
-              <option key={key} value={key}>{value}</option>
+          <div className="w-full max-w-2xl mb-4">
+            <h2 className="text-lg font-semibold mb-2">Comments</h2>
+            {comments.map((comment) => (
+              <div key={comment.id} className="bg-slate-600 p-3 rounded mb-2 flex justify-between items-start">
+                <div>
+                  <p>{comment.content}</p>
+                  <div className="text-sm text-gray-400">
+                    {comment.deleted_at ? (
+                      <>
+                        <span>Deleted at {new Date(parseInt(comment.deleted_at)).toLocaleString()}</span>
+                        <span className="ml-2 px-2 py-1 bg-red-900 text-xs rounded">DELETED</span>
+                      </>
+                    ) : (
+                      <span>by {comment.first_name} {comment.last_name}</span>
+                    )}
+                  </div>
+                </div>
+                {isAdmin && !comment.deleted_at && (
+                  <Button variant="destructive" size="icon" onClick={() => handleDeleteComment(comment.id)}>
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
             ))}
-          </select>
-          <Button onClick={handleStatusChange} className="ml-2">Update Status</Button>
-        </div>
+            
+            <div className="flex gap-2 mt-4">
+              <input
+                type="text"
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                placeholder="Add a comment..."
+                className="flex-1 p-2 bg-slate-700 text-white rounded"
+              />
+              <Button onClick={handleAddComment}>Add</Button>
+            </div>
+          </div>
+
+          {isAdmin && (
+            <div className="mb-4 bg-slate-600 p-3 rounded">
+              <h3 className="text-lg font-semibold">Change Status</h3>
+              <select
+                value={newStatus || ""}
+                onChange={(e) => setNewStatus(Number(e.target.value))}
+                className="p-2 bg-slate-700 text-white rounded"
+              >
+                <option value="">Select status</option>
+                {getNextAllowedStatuses(idea.status).map((status) => (
+                  <option key={status} value={status}>
+                    {statusMap[status]}
+                  </option>
+                ))}
+              </select>
+              <Button 
+                onClick={handleStatusChange} 
+                className="ml-2" 
+                disabled={!newStatus}
+              >
+                Update Status
+              </Button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

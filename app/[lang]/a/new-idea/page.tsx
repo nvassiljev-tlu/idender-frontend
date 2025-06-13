@@ -16,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2 } from "lucide-react"; //  Добавлено
+import { Loader2 } from "lucide-react"; 
 
 export default function IdeaPage() {
   const [title, setTitle] = useState("");
@@ -25,7 +25,7 @@ export default function IdeaPage() {
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
   const [categories, setCategories] = useState<{ id: number; name: string }[]>([]);
-  const [isLoading, setIsLoading] = useState(true); //  Добавлено
+  const [isLoading, setIsLoading] = useState(true); 
   const router = useRouter();
   const [lang, setLang] = useState("");
 
@@ -144,14 +144,14 @@ export default function IdeaPage() {
 
       if (response.ok) {
         const data = await response.json();
-        console.log("Full API Response:", JSON.stringify(data, null, 2)); // Детальная отладка
+        console.log("Full API Response:", JSON.stringify(data, null, 2));
         setShowAlert(true);
 
-        // Извлечение ID с проверкой
+        
         let ideaId = data.payload?.idea?.id;
         if (!ideaId) {
           console.error("ID not found in payload.idea.id, checking alternatives:", data); // 
-          // Попытка найти ID в других частях ответа (если структура отличается)
+        
           ideaId = data.payload?.id || Object.values(data.payload || {}).find((item: any) => item?.id)?.id;
         }
 
@@ -177,7 +177,7 @@ export default function IdeaPage() {
     }
   };
 
-  // 🔄 Показываем Loader2 пока isLoading === true
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-slate-500 flex items-center justify-center">
