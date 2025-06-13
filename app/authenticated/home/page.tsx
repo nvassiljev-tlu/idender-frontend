@@ -36,7 +36,7 @@ export default function IdenderDashboard() {
   const fetchNews = async () => {
   try {
     const token = Cookie.get('sid');
-    const res = await fetch('http://37.27.182.28:3001/v1/news', { // news endpoint
+    const res = await fetch('http://37.27.182.28:3001/v1/news/recent', { // news endpoint
       method: 'GET',
       credentials: 'include',
       headers: { 
@@ -47,7 +47,7 @@ export default function IdenderDashboard() {
     
     if (res.ok) {
       const data = await res.json();
-      setNews(data);
+      setNews(data.payload);
     } else {
       console.error('Failed to fetch news');
     }
@@ -232,7 +232,7 @@ export default function IdenderDashboard() {
           {news.length === 0 ? (
             <div className="grid grid-cols-1 gap-4 w-full min-w-[320px]">
               <div className="bg-white p-6 rounded-lg shadow-sm text-center min-h-[150px] flex flex-col justify-center items-center">
-                <p className="text-slate-500 mb-2">No news articles found</p>
+                <p className="text-slate-500 mb-2">No news to display.</p>
                 <button 
                   onClick={fetchNews}
                   className="text-blue-600 hover:text-blue-800 text-sm"
