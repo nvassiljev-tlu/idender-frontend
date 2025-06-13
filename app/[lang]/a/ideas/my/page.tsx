@@ -9,7 +9,18 @@ type Idea = {
   id: string;
   title: string;
   description: string;
-  status: 'accepted' | 'declined';
+  status: number;
+  is_anonymus?: number;
+  createdAt?: string;
+};
+
+const statusMap = {
+  0: "Created / Pending Moderation",
+  1: "On Voting",
+  2: "Pending School Administration Decision",
+  3: "Approved",
+  4: "Declined (by School)",
+  5: "Declined (Moderation)"
 };
 
 export default function MyIdeasPage() {
@@ -19,7 +30,6 @@ export default function MyIdeasPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isFetchingIdeas, setIsFetchingIdeas] = useState(false);
 
-  // Check if user is logged in
   useEffect(() => {
     const checkLogin = async () => {
       try {
@@ -49,7 +59,6 @@ export default function MyIdeasPage() {
         }
       } catch (err) {
         setError('Could not connect to server.');
-        console.log(err);
       } finally {
         setIsLoading(false);
       }
@@ -58,7 +67,6 @@ export default function MyIdeasPage() {
     checkLogin();
   }, []);
 
-  // Load ideas if logged in
   useEffect(() => {
     if (!userId) return;
 
@@ -123,13 +131,12 @@ export default function MyIdeasPage() {
           <p className="text-center text-sm text-white">No ideas submitted yet.</p>
         )}
 
-
         {!isLoading && ideas.map((idea) => (
           <div key={idea.id} className="border border-slate-400 p-4 rounded bg-slate-700">
             <h2 className="text-lg font-semibold">{idea.title}</h2>
             <p className="text-sm text-slate-300 mb-2">{idea.description}</p>
-            <p className={`text-sm font-semibold ${idea.status === 'accepted' ? 'text-green-400' : 'text-red-400'}`}>
-              Status: {idea.status === 'accepted' ? '✅ Accepted' : '❌ Declined'}
+            <p className="text-sm font-semibold">
+              Status: {statusMap[idea.status] || 'Unknown'}
             </p>
           </div>
         ))}
