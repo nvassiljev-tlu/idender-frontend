@@ -27,6 +27,42 @@ export default function IdeaPage() {
   const [categories, setCategories] = useState<{ id: number; name: string }[]>([]);
   const [isLoading, setIsLoading] = useState(true); //  Добавлено
   const router = useRouter();
+  const [lang, setLang] = useState("");
+
+  useEffect(() => {
+    const checkLogin = async () => {
+      try {
+        const token = Cookie.get('sid');
+        if (!token) {
+          router.push('/et/login');
+        }
+
+        const res = await fetch('http://37.27.182.28:3001/v1/oauth/me', {
+          method: 'GET',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+
+        if (res.status === 200) {
+    
+          const language = Cookie.get('lang') || 'et';
+          setLang(language);
+        } else {
+          Cookie.remove('sid');
+          router.push(`/et/login`);
+        }
+      } catch (err) {
+       router.push(`/et/login`);
+        console.log(err);
+      } 
+    };
+
+    checkLogin();
+  }, []);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -52,7 +88,7 @@ export default function IdeaPage() {
       } catch (error) {
         console.error("Error fetching categories:", error);
       } finally {
-        setIsLoading(false); //  Устанавливаем загрузку в false
+        setIsLoading(false);
       }
     };
     fetchCategories();
@@ -120,7 +156,7 @@ export default function IdeaPage() {
         }
 
         if (ideaId) {
-          router.push(`/authenticated/new_idea/${ideaId}`);
+          router.push(`/${lang}/a/ideas/${ideaId}`);
         } else {
           console.error("No valid ID found in API response:", data);
           alert("Failed to get idea ID from API response. Check console for details.");

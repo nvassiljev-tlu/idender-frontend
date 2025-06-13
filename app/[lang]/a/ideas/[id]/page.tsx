@@ -9,7 +9,8 @@ import {
   AlertTitle,
 } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Trash2, Loader2 } from "lucide-react"; // добавлен Loader2
+import { Trash2, Loader2, Router } from "lucide-react"; 
+import { useRouter } from "next/navigation";
 
 type Idea = {
   id: string;
@@ -43,6 +44,8 @@ export default function IdeaDetailPage() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [newStatus, setNewStatus] = useState<number | null>(null);
   const [loading, setLoading] = useState(true); // Loading state
+  const [lang, setLang] = useState(""); // Language state
+  const router = useRouter();
 
   const statusMap = {
     0: "Created / Pending Moderation",
@@ -107,7 +110,10 @@ export default function IdeaDetailPage() {
         if (!userResponse.ok) {
           console.error("Failed to fetch user data:", await userResponse.json());
           setError("Failed to authenticate user.");
+          router.push("/et/login");
         }
+        const language = Cookie.get("lang") || "et";
+        setLang(language);
       } catch (err) {
         setError("An error occurred while fetching data.");
         console.error("Fetch error:", err);
