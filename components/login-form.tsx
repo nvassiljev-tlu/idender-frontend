@@ -50,7 +50,8 @@ export function LoginForm() {
       if (response.ok) {
         // Login successful - redirect or set user state
         Cookie.set("sid", data.payload.data.session)
-        router.push("/authenticated/home")
+        Cookie.set("lang", data.payload.data.language)
+        router.push(`/${data.payload.data.language}/a/home`)
       } else {
         setError(data.message || "Login failed")
       }
@@ -99,7 +100,7 @@ export function LoginForm() {
         <div className="mt-4 text-center text-sm text-slate-600">
           <a href="#" className="text-slate-700 hover:underline">Forgot password?</a>
           <span className="mx-2">•</span>
-          <Link href="/signup" className="text-slate-700 hover:underline">Sign Up</Link>
+          <Link href="/et/signup" className="text-slate-700 hover:underline">Sign Up</Link>
         </div>
     </Form>
     
