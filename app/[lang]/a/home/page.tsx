@@ -27,6 +27,7 @@ export default function IdenderDashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const profileMenuRef = useRef<HTMLDivElement | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [lang, setLang] = useState("")
   const [news, setNews] = useState<Array<{
     id: number;
     title: string;
@@ -79,16 +80,17 @@ export default function IdenderDashboard() {
       
       if (res.status !== 200) {
         Cookie.remove("sid");
-        router.push('/login');
+        router.push(`${lang}/login`);
         return;
       }
-      
+      const language = Cookie.get("lang") || 'et'
+      setLang(language)
       // only fetch news if login check succeeds
       await fetchNews();
     } catch (err) {
       console.log(err);
       Cookie.remove("sid");
-      router.push('/login');
+      router.push(`/${lang}/login`);
     } finally {
       setIsLoading(false);
     }
@@ -99,11 +101,11 @@ export default function IdenderDashboard() {
 
   const handleLogout = () => {
     Cookie.remove('sid');
-    router.push('/login');
+    router.push(`/${lang}/login`);
   };
 
   const handleCreateIdea = () => {
-    router.push('/authenticated/new_idea');
+    router.push(`/${lang}/a/new-idea`);
   };
 
   /* mock data - replace with actual data fetching
@@ -194,7 +196,7 @@ export default function IdenderDashboard() {
               <button
                 onClick={() => {
                   setShowProfileMenu(false);
-                  router.push('/authenticated/my_profile');
+                  router.push(`/${lang}/a/profile`);
                 }}
                 className="block w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-100"
               >
@@ -203,7 +205,7 @@ export default function IdenderDashboard() {
               <button
                 onClick={() => {
                   setShowProfileMenu(false);
-                  router.push('/authenticated/my_ideas');
+                  router.push(`/${lang}/a/ideas/my`);
                 }}
                 className="block w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-100"
               >
@@ -273,7 +275,7 @@ export default function IdenderDashboard() {
             <span>Create idea</span>
           </button>
           {/* voting Button */}
-          <button onClick={() => router.push('/authenticated/voting')}
+          <button onClick={() => router.push(`/${lang}/a/voting`)}
             className="flex-1 flex items-center justify-center gap-2 bg-slate-700 text-white px-4 py-3 rounded-full shadow-lg hover:bg-slate-600 transition-colors">
             <VoteIcon />
             <span>Voting</span>
