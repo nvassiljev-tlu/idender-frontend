@@ -29,6 +29,15 @@
   "invalidOtp": "Vigane kood",
   "otpMessage": "Sisesta kehtiv 6-kohaline kood.",
   "verified": "Kinnitatud",
-  "otpSuccess": "Kood kinnitatud! Suunatakse sisselogimisele..."
+  "otpSuccess": "Kood kinnitatud! Suunatakse sisselogimisele...",
+  "myProfile": "Minu profiil",
+  "success": "Edukas",
+  "updateSuccess": "Sinu andmed on edukalt uuendatud",
+  "fullName": "Täisnimi",
+  "preferredLanguage": "Eelistatud keel",
+  "profilePicture": "Profiilipilt",
+  "updateBtn": "Uuenda",
+  "backToHome": "Tagasi avalehele"
+
 
 }

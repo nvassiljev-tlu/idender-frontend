@@ -29,5 +29,14 @@
   "invalidOtp": "Invalid OTP",
   "otpMessage": "Please enter a valid 6-digit verification code.",
   "verified": "Verified",
-  "otpSuccess": "OTP verified! Redirecting to login..."
+  "otpSuccess": "OTP verified! Redirecting to login...",
+  "myProfile": "My Profile",
+  "success": "Success",
+  "updateSuccess": "Your data has been successfully updated",
+  "fullName": "Full Name",
+  "preferredLanguage": "Preferred Language",
+  "profilePicture": "Profile Picture",
+  "updateBtn": "Update",
+  "backToHome": "Back to Home"
+
 }

@@ -29,5 +29,13 @@
   "invalidOtp": "Code invalide",
   "otpMessage": "Veuillez saisir un code de vérification à 6 chiffres.",
   "verified": "Vérifié",
-  "otpSuccess": "Code vérifié ! Redirection vers la connexion..."
+  "otpSuccess": "Code vérifié ! Redirection vers la connexion...",
+  "myProfile": "Mon profil",
+  "success": "Succès",
+  "updateSuccess": "Vos données ont été mises à jour avec succès",
+  "fullName": "Nom complet",
+  "preferredLanguage": "Langue préférée",
+  "profilePicture": "Photo de profil",
+  "updateBtn": "Mettre à jour",
+  "backToHome": "Retour à l'accueil"
 }
