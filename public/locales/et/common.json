@@ -37,7 +37,10 @@
   "preferredLanguage": "Eelistatud keel",
   "profilePicture": "Profiilipilt",
   "updateBtn": "Uuenda",
-  "backToHome": "Tagasi avalehele"
-
-
+  "backToHome": "Tagasi avalehele",
+  "alreadyAccount": "Kas sul on juba konto?",
+  "loginHere": "Logi sisse siit",
+  "forgotPassword": "Unustasid parooli?"
 }
+
+

@@ -18,6 +18,7 @@ export default function ForgotPasswordPage() {
   const [error, setError] = useState<string | null>(null);
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
+  const [navigating, setNavigating] = useState(false);
 
   useEffect(() => {
     const changeLang = async () => {
@@ -48,14 +49,12 @@ export default function ForgotPasswordPage() {
       }
 
       const data = await res.json();
-      console.log('Server response:', data);
-
-      // Попробуем найти код в нескольких полях
-      const code = data.payload.code ;
+      const code = data.payload.code;
       if (!code) {
         throw new Error('Reset code not received from server');
       }
 
+      setNavigating(true);
       router.push(`/${lang}/reset-password?email=${encodeURIComponent(email)}&code=${encodeURIComponent(code)}&lang=${lang}`);
 
     } catch (err) {
@@ -68,40 +67,59 @@ export default function ForgotPasswordPage() {
   if (!ready) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-white" />
+        <Loader2 className="h-8 w-8 animate-spin" />
       </div>
     );
   }
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4">
-      <div className="bg-white backdrop-blur-sm p-6 rounded-xl shadow-lg max-w-md w-full">
-        <h1 className="text-4xl sm:text-6xl md:text-5xl font-bold text-slate-700 text-center mb-6">
+      {(loading || navigating) && (
+        <div className="fixed inset-0 bg-slate-500 bg-opacity-80 flex items-center justify-center z-50">
+          <Loader2 className="h-8 w-8 animate-spin text-white" />
+        </div>
+      )}
+
+      <div className="bg-white backdrop-blur-sm p-6 rounded-xl shadow-lg max-w-sm w-full sm:w-80">
+        <h1 className="text-3xl sm:text-4xl md:text-4xl font-bold text-slate-700 text-center mb-6">
           {t('forgotPassword')}
         </h1>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-6">
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder={t('email')}
-            className="w-full p-2 border border-gray-300 rounded-md text-black bg-white"
+            className="h-auto w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-slate-700 text-black bg-white"
             required
-            disabled={loading}
+            disabled={loading || navigating}
           />
 
           <Button
             type="submit"
-            disabled={loading}
+            disabled={loading || navigating}
             className="w-full bg-slate-800 text-white py-2 px-4 rounded hover:bg-slate-500 transition duration-200 flex items-center justify-center"
           >
-            {loading && <Loader2 className="h-5 w-5 animate-spin mr-2" />}
+            {(loading || navigating) && <Loader2 className="h-5 w-5 animate-spin mr-2" />}
             {loading ? t('sending') : t('send reset link')}
           </Button>
         </form>
 
-        {error && <p className="text-red-500 mt-2 text-sm">{error}</p>}
+        {error && <p className="text-red-500 mt-4 text-sm">{error}</p>}
+
+        <div className="mt-6 text-center">
+          <button
+            type="button"
+            onClick={() => {
+              setNavigating(true);
+              router.push(`/${lang}/login`);
+            }}
+            className="text-black hover:underline hover:text-black/70 text-sm font-medium transition"
+          >
+            {t('backToLogin')}
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -37,5 +37,8 @@
   "preferredLanguage": "Langue préférée",
   "profilePicture": "Photo de profil",
   "updateBtn": "Mettre à jour",
-  "backToHome": "Retour à l'accueil"
+  "backToHome": "Retour à l'accueil",
+  "alreadyAccount": "Vous avez déjà un compte ?",
+  "loginHere": "Connectez-vous ici",
+  "forgotPassword": "Mot de passe oublié ?"
 }
