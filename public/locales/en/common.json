@@ -37,6 +37,9 @@
   "preferredLanguage": "Preferred Language",
   "profilePicture": "Profile Picture",
   "updateBtn": "Update",
-  "backToHome": "Back to Home"
+  "backToHome": "Back to Home",
+  "alreadyAccount": "Already have an account?",
+  "loginHere": "Log in here",
+  "forgotPassword": "Forgot password?"
 
 }
