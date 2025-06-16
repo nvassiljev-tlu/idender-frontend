@@ -1,23 +1,20 @@
-"use client";
+'use client';
 
-import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Cookie from "js-cookie";
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from "@/components/ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import { Trash2, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { Suspense } from "react";
 
 type Idea = {
   id: string;
   title: string;
   description: string;
   status: number;
-  categories: number[];
+  categories: { id: number; name: string }[];
   is_anonymus?: number;
   createdAt?: string;
   user_id?: string;
@@ -36,7 +33,7 @@ type Comment = {
   last_name: string;
 };
 
-export default function IdeaDetailPage() {
+function IdeaDetailPageContent() {
   const { id } = useParams();
   const [idea, setIdea] = useState<Idea | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
@@ -47,6 +44,7 @@ export default function IdeaDetailPage() {
   const [newStatus, setNewStatus] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [lang, setLang] = useState("");
+  const [statusMessage, setStatusMessage] = useState("");
   const router = useRouter();
 
   const statusMap = {
@@ -69,7 +67,7 @@ export default function IdeaDetailPage() {
 
   useEffect(() => {
     const fetchData = async () => {
-      setLoading(true); 
+      setLoading(true);
       try {
         const token = Cookie.get("sid");
         if (!token) {
@@ -82,46 +80,83 @@ export default function IdeaDetailPage() {
           headers: { Authorization: `Bearer ${token}` },
           credentials: "include",
         });
-        
+
         if (ideaResponse.ok) {
           const data = await ideaResponse.json();
           const ideaData = data.payload.idea;
-          
+
           if (ideaData.is_anonymus === 1 && !data.payload.is_admin) {
             ideaData.first_name = "Anonymous";
             ideaData.last_name = "";
           }
-          
-          setIdea(ideaData || { id, title: "Sample Idea", description: "Sample description", status: 0, categories: [] });
+
+          // Ensure categories is always an array of objects
+          ideaData.categories = Array.isArray(ideaData.categories) ? ideaData.categories : [];
+
+          setIdea(
+            ideaData || {
+              id,
+              title: "Sample Idea",
+              description: "Sample description",
+              status: 0,
+              categories: [],
+            }
+          );
           setIsAdmin(data.payload.is_admin || false);
+
+          // If admin and status is "On Voting", fetch likes/dislikes
+          if (data.payload.is_admin && ideaData.status === 1) {
+            // Fetch likes/dislikes from the voting API
+            const votesRes = await fetch(`http://37.27.182.28:3001/v1/ideas/${id}/votes`, {
+              headers: { Authorization: `Bearer ${token}` },
+              credentials: "include",
+            });
+            if (votesRes.ok) {
+              const votesData = await votesRes.json();
+              setVoteCount({
+                likes: votesData.payload.likes ?? 0,
+                dislikes: votesData.payload.dislikes ?? 0,
+              });
+            } else {
+              setVoteCount({ likes: 0, dislikes: 0 });
+            }
+          } else {
+            setVoteCount({ likes: 0, dislikes: 0 });
+          }
         } else {
           setError("Failed to load idea.");
         }
 
+        // ...comments fetch unchanged...
         const commentsResponse = await fetch(`http://37.27.182.28:3001/v1/ideas/${id}/comments`, {
           headers: { Authorization: `Bearer ${token}` },
           credentials: "include",
         });
-        
+
         if (commentsResponse.ok) {
           const data = await commentsResponse.json();
-          const formattedComments = data.payload.map((c: any) => ({
-            id: c.id,
-            content: c.comment,
-            created_at: c.created_at,
-            deleted_at: c.deleted_at,
-            user_id: c.user_id,
-            suggestion_id: c.suggestion_id,
-            first_name: c.first_name || "Unknown",
-            last_name: c.last_name || "User",
-          }));
+          const formattedComments = Array.isArray(data.payload)
+            ? data.payload.map((c: any) => ({
+                id: c.id,
+                content: c.comment,
+                created_at: c.created_at,
+                deleted_at: c.deleted_at,
+                user_id: c.user_id,
+                suggestion_id: c.suggestion_id,
+                first_name: c.first_name || "Unknown",
+                last_name: c.last_name || "User",
+              }))
+            : [];
           setComments(formattedComments);
+        } else {
+          setComments([]);
         }
 
         const language = Cookie.get("lang") || "et";
         setLang(language);
       } catch (err) {
         setError("An error occurred while fetching data.");
+        setComments([]);
       } finally {
         setLoading(false);
       }
@@ -129,6 +164,10 @@ export default function IdeaDetailPage() {
 
     fetchData();
   }, [id]);
+
+  useEffect(() => {
+    console.log("Current comments state:", comments);
+  }, [comments]);
 
   const handleAddComment = async () => {
     if (!newComment.trim()) return;
@@ -198,11 +237,16 @@ export default function IdeaDetailPage() {
       if (response.ok) {
         setIdea((prev) => (prev ? { ...prev, status: newStatus } : null));
         setNewStatus(null);
+        setStatusMessage(`Status updated to ${statusMap[newStatus]}`);
+        setTimeout(() => setStatusMessage(""), 2000);
       }
     } catch (err) {
       setError("An error occurred while updating status.");
     }
   };
+
+  // Debug log before render
+  console.log("Rendering with comments:", comments);
 
   if (error) {
     return (
@@ -215,7 +259,7 @@ export default function IdeaDetailPage() {
     );
   }
 
-  if (loading) {
+  if (loading || !idea) {
     return (
       <div className="min-h-screen bg-slate-500 flex items-center justify-center">
         <Loader2 className="w-10 h-10 text-white animate-spin" />
@@ -231,37 +275,65 @@ export default function IdeaDetailPage() {
       {idea && (
         <>
           <p className="mb-4">Status: {statusMap[idea.status]}</p>
-          
-          {idea.is_anonymus === 1 && isAdmin && (
+
+          {/* Render category tags as names */}
+          {(idea.categories && idea.categories.length > 0) && (
+            <div className="mb-4 flex gap-2 flex-wrap">
+              {idea.categories.map((category) => (
+                <span key={category.id} className="bg-slate-600 text-white px-2 py-1 rounded">
+                  {category.name}
+                </span>
+              ))}
+            </div>
+          )}
+
+          {(isAdmin || (!idea.is_anonymus || (idea.is_anonymus && !isAdmin))) && (
             <p className="mb-4 text-sm text-gray-400">
-              Submitted by: {idea.first_name} {idea.last_name} (ID: {idea.user_id})
+              Submitted by: {idea.first_name} {idea.last_name}
             </p>
+          )}
+          
+
+          {/* Admin view: Show likes/dislikes if status is "On Voting" */}
+          {isAdmin && idea.status === 1 && (
+            <div className="flex gap-4 mb-4">
+              <span className="inline-flex items-center bg-green-700 text-white px-3 py-1 rounded-full font-semibold">
+                👍 {voteCount.likes}
+              </span>
+              <span className="inline-flex items-center bg-red-700 text-white px-3 py-1 rounded-full font-semibold">
+                👎 {voteCount.dislikes}
+              </span>
+            </div>
           )}
 
           <div className="w-full max-w-2xl mb-4">
             <h2 className="text-lg font-semibold mb-2">Comments</h2>
-            {comments.map((comment) => (
-              <div key={comment.id} className="bg-slate-600 p-3 rounded mb-2 flex justify-between items-start">
-                <div>
-                  <p>{comment.content}</p>
-                  <div className="text-sm text-gray-400">
-                    {comment.deleted_at ? (
-                      <>
-                        <span>Deleted at {new Date(parseInt(comment.deleted_at)).toLocaleString()}</span>
-                        <span className="ml-2 px-2 py-1 bg-red-900 text-xs rounded">DELETED</span>
-                      </>
-                    ) : (
-                      <span>by {comment.first_name} {comment.last_name}</span>
-                    )}
+            {comments && comments.length > 0 ? (
+              comments.map((comment) => (
+                <div key={comment.id} className="bg-slate-600 p-3 rounded mb-2 flex justify-between items-start">
+                  <div>
+                    <p>{comment.content}</p>
+                    <div className="text-sm text-gray-400">
+                      {comment.deleted_at ? (
+                        <>
+                          <span>Deleted at {new Date(parseInt(comment.deleted_at)).toLocaleString()}</span>
+                          <span className="ml-2 px-2 py-1 bg-red-900 text-xs rounded">DELETED</span>
+                        </>
+                      ) : (
+                        <span>by {comment.first_name} {comment.last_name}</span>
+                      )}
+                    </div>
                   </div>
+                  {isAdmin && !comment.deleted_at && (
+                    <Button variant="destructive" size="icon" onClick={() => handleDeleteComment(comment.id)}>
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  )}
                 </div>
-                {isAdmin && !comment.deleted_at && (
-                  <Button variant="destructive" size="icon" onClick={() => handleDeleteComment(comment.id)}>
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                )}
-              </div>
-            ))}
+              ))
+            ) : (
+              <p>No comments yet.</p>
+            )}
             
             <div className="flex gap-2 mt-4">
               <input
@@ -301,6 +373,19 @@ export default function IdeaDetailPage() {
           )}
         </>
       )}
+      {statusMessage && (
+        <div className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-green-600 text-white px-4 py-2 rounded shadow-md">
+          {statusMessage}
+        </div>
+      )}
     </div>
+  );
+}
+
+export default function IdeaDetailPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-slate-500 flex items-center justify-center"><Loader2 className="w-10 h-10 text-white animate-spin" /></div>}>
+      <IdeaDetailPageContent />
+    </Suspense>
   );
 }
