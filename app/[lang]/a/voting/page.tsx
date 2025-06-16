@@ -16,8 +16,9 @@ type Idea = {
 export default function VotingPage() {
   const router = useRouter();
   const [idea, setIdea] = useState<Idea | null>(null);
-  const [isLoading, setIsLoading] = useState(true); // Для проверки сессии
-  const [isFetchingIdea, setIsFetchingIdea] = useState(false); // Для загрузки идеи
+  const [isLoading, setIsLoading] = useState(true);
+  const [isFetchingIdea, setIsFetchingIdea] = useState(false);
+  const [lang, setLang] = useState("");
 
   const cardRef = useRef<HTMLDivElement | null>(null);
   const startX = useRef<number | null>(null);
@@ -30,7 +31,6 @@ export default function VotingPage() {
     setIsDragging(false);
   };
 
-  // Проверка сессии
   useEffect(() => {
     const checkSession = async () => {
       try {
@@ -51,22 +51,26 @@ export default function VotingPage() {
 
         if (!sessionResponse.ok) {
           Cookie.remove('sid');
-          router.push('/login');
+          const language = Cookie.get("lang") || 'et';
+          router.push(`/${language}/login`);
           return;
         }
+        
+        const language = Cookie.get("lang") || 'et';
+        setLang(language);
       } catch (err) {
         console.error('Error checking session:', err);
         Cookie.remove('sid');
-        router.push('/login');
+        const language = Cookie.get("lang") || 'et';
+        router.push(`/${language}/login`);
       } finally {
-        setIsLoading(false); // Убрана искусственная задержка
+        setIsLoading(false);
       }
     };
 
     checkSession();
   }, [router]);
 
-  // Загрузка идеи
   const fetchIdea = async () => {
     setIsFetchingIdea(true);
     try {
@@ -79,9 +83,15 @@ export default function VotingPage() {
           'Authorization': `Bearer ${token}`,
         },
       });
-      if (!res.ok) throw new Error('Failed to load idea');
-      const data = await res.json();
 
+      if (res.status === 204) {
+        setIdea(null);
+        return;
+      }
+
+      if (!res.ok) throw new Error('Failed to load idea');
+
+      const data = await res.json();
       if (data.status === 'OPERATION-OK' && data.payload) {
         setIdea(data.payload);
       } else {
@@ -97,7 +107,7 @@ export default function VotingPage() {
   };
 
   useEffect(() => {
-    if (isLoading) return; // Ждём завершения проверки сессии
+    if (isLoading) return;
     fetchIdea();
   }, [isLoading]);
 
@@ -120,9 +130,9 @@ export default function VotingPage() {
     const threshold = 100;
 
     if (deltaX > threshold) {
-      submitVote('like');
+      submitVote(1);
     } else if (deltaX < -threshold) {
-      submitVote('dislike');
+      submitVote(0);
     } else {
       resetCard();
     }
@@ -130,7 +140,7 @@ export default function VotingPage() {
     startX.current = null;
   };
 
-  const submitVote = async (vote: 'like' | 'dislike') => {
+  const submitVote = async (reaction: 0 | 1) => {
     if (!idea) return;
 
     setIsDragging(false);
@@ -146,11 +156,17 @@ export default function VotingPage() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify({ vote }),
+        body: JSON.stringify({ reaction }),
       });
-      if (!res.ok) throw new Error('Failed to submit vote');
-      const data = await res.json();
 
+      if (res.status === 204) {
+        setIdea(null);
+        return;
+      }
+
+      if (!res.ok) throw new Error('Failed to submit vote');
+
+      const data = await res.json();
       if (data.status === 'OPERATION-OK' && data.payload) {
         setIdea(data.payload);
       } else {
@@ -202,7 +218,7 @@ export default function VotingPage() {
         <div className="text-base mt-10 text-center">No more ideas to vote on!</div>
         <Button
           className="mt-6 w-40 rounded-none bg-white text-slate-700 hover:bg-slate-200"
-          onClick={() => router.push('/authenticated/home')}
+          onClick={() => router.push(`/${lang}/a/home`)}
         >
           Go to Homepage
         </Button>
