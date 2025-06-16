@@ -6,6 +6,7 @@ import { useRouter, useParams } from "next/navigation";
 import Cookie from "js-cookie";
 import { useTranslation } from "react-i18next";
 import i18n from '../../i18n/client';
+import { Loader2 } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -18,7 +19,6 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Change language and wait before rendering
     const changeLang = async () => {
       if (i18n.language !== lang) {
         await i18n.changeLanguage(lang);
@@ -53,7 +53,13 @@ export default function LoginPage() {
     checkLogin();
   }, [lang, router]);
 
-  if (!ready || loading) return <p className="text-center mt-4">{t('loading')}</p>;
+  if (!ready || loading) {
+    return (
+      <div className="fixed inset-0 bg-slate-500 bg-opacity-80 flex items-center justify-center z-50">
+        <Loader2 className="h-8 w-8 animate-spin text-white" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center">
