@@ -83,7 +83,7 @@ export default function ResetPasswordPage() {
     return (
       <div className="min-h-screen flex items-center justify-center px-4">
         <div className="bg-white backdrop-blur-sm p-6 rounded-xl shadow-lg max-w-md w-full text-center">
-          <h1 className="text-2xl font-bold text-green-600 mb-4">
+          <h1 className="text-4xl sm:text-6xl md:text-5xl font-bold text-green-600 mb-4">
             {t('passwordResetSuccess')}
           </h1>
           <p>{t('redirectingToLogin')}</p>
@@ -95,17 +95,17 @@ export default function ResetPasswordPage() {
   return (
     <div className="min-h-screen flex items-center justify-center px-4">
       <div className="bg-white backdrop-blur-sm p-6 rounded-xl shadow-lg max-w-md w-full">
-        <h1 className="text-3xl font-bold text-slate-700 text-center mb-6">
+        <h1 className="text-4xl sm:text-6xl md:text-5xl font-bold text-slate-700 text-center mb-6">
           {t('resetPassword')}
         </h1>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-6">
           <Input
             type="password"
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
             placeholder={t('newPassword')}
-            className="w-full p-2 border border-gray-300 rounded-md text-black bg-white"
+            className="h-auto w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-slate-700"
             required
             disabled={loading}
           />
@@ -115,7 +115,7 @@ export default function ResetPasswordPage() {
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             placeholder={t('confirmPassword')}
-            className="w-full p-2 border border-gray-300 rounded-md text-black bg-white"
+            className="h-auto w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-slate-700"
             required
             disabled={loading}
           />
@@ -123,14 +123,24 @@ export default function ResetPasswordPage() {
           <Button
             type="submit"
             disabled={loading}
-            className="w-full"
+            className="w-full bg-slate-800 text-white py-2 px-4 rounded hover:bg-slate-500 transition duration-200 flex items-center justify-center"
           >
-            {loading && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+            {loading && <Loader2 className="h-5 w-5 animate-spin mr-2" />}
             {t('resetPasswordButton')}
           </Button>
         </form>
 
-        {error && <p className="text-red-500 mt-2 text-sm">{error}</p>}
+        {error && <p className="text-red-500 mt-4 text-sm">{error}</p>}
+
+        <div className="mt-6 text-center">
+          <button
+            type="button"
+            onClick={() => router.push(`/${lang}/login`)}
+            className="text-black hover:underline hover:text-black/70 text-sm font-medium transition"
+          >
+            {t('backToLogin')}
+          </button>
+        </div>
       </div>
     </div>
   );
