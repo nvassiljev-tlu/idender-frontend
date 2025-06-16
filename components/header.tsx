@@ -7,7 +7,7 @@ export default function Header() {
     const router = useRouter();
     const pathname = usePathname();
     const [showProfileMenu, setShowProfileMenu] = useState(false);
-    const [lang, setLang] = useState('et'); // Default to Estonian
+    const [lang, setLang] = useState('et');
     const profileMenuRef = useRef<HTMLDivElement | null>(null);
 
     useEffect(() => {
@@ -15,10 +15,8 @@ export default function Header() {
 
       const urlLang = pathname.split('/')[1];
       
-      // Supported languages
       const supportedLangs = ['et', 'en', 'fr'];
       
-      // Determine final language (cookie > URL > default)
       const detectedLang = 
         (cookieLang && supportedLangs.includes(cookieLang)) 
           ? cookieLang
@@ -28,7 +26,6 @@ export default function Header() {
       
       setLang(detectedLang);
       
-      // Update cookie if not set or different
       if (!cookieLang || cookieLang !== detectedLang) {
         Cookie.set("lang", detectedLang, { expires: 365 });
       }
@@ -47,19 +44,15 @@ export default function Header() {
             }
             });
 
-            // 2. Only proceed if logout was successful
             if (response.ok) {
             Cookie.remove('sid');
             router.push(`/${lang}/login`);
             } else {
             console.error('Logout failed:', await response.text());
-            // Optional: Show error to user
             }
         } catch (err) {
             console.error('Logout error:', err);
-            // Optional: Show error to user
         } finally {
-            // Always remove client-side token
             Cookie.remove('sid');
             router.push(`/${lang}/login`);
         }
