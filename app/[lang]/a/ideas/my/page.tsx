@@ -21,7 +21,7 @@ const statusMap = {
   2: "Pending School Administration Decision",
   3: "Approved",
   4: "Declined (by School)",
-  5: "Declined (Moderation)"
+  5: "Declined (Moderation)",
 };
 
 export default function MyIdeasPage() {
@@ -56,6 +56,8 @@ export default function MyIdeasPage() {
 
         if (res.status === 200 && data.payload?.user?.id) {
           setUserId(data.payload.user.id);
+          const language = Cookie.get("lang") || "et";
+          setLang(language);
         } else {
           Cookie.remove('sid');
           setError('You are not logged in.');
@@ -104,8 +106,7 @@ export default function MyIdeasPage() {
   }, [userId]);
   
   const handleIdeaClick = (ideaId: string) => {
-    const language = Cookie.get("lang") || "et";
-    router.push(`/${language}/a/ideas/${ideaId}`);
+    router.push(`/${lang}/a/ideas/${ideaId}`);
   };
 
   if (isLoading) {
@@ -132,7 +133,10 @@ export default function MyIdeasPage() {
         )}
 
         {isFetchingIdeas && !error && (
-          <p className="text-center text-sm text-white">Loading your ideas...</p>
+          <div className="flex items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin text-white" />
+            <p className="text-sm text-white ml-2">Loading your ideas...</p>
+          </div>
         )}
 
         {!isFetchingIdeas && ideas.length === 0 && !error && (

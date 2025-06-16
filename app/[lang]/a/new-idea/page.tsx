@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
@@ -28,6 +28,7 @@ export default function IdeaPage() {
   const [isLoading, setIsLoading] = useState(true); 
   const router = useRouter();
   const [lang, setLang] = useState("");
+  const [createMessage, setCreateMessage] = useState("");
 
   useEffect(() => {
     const checkLogin = async () => {
@@ -46,9 +47,7 @@ export default function IdeaPage() {
           },
         });
 
-
         if (res.status === 200) {
-    
           const language = Cookie.get('lang') || 'et';
           setLang(language);
         } else {
@@ -56,7 +55,7 @@ export default function IdeaPage() {
           router.push(`/et/login`);
         }
       } catch (err) {
-       router.push(`/et/login`);
+        router.push(`/et/login`);
         console.log(err);
       } 
     };
@@ -96,13 +95,13 @@ export default function IdeaPage() {
 
   const handleTagChange = (value: string) => {
     const selectedId = categories.find((cat) => cat.name === value)?.id;
-    if (selectedId) {
-      setTags((prevTags) =>
-        prevTags.includes(selectedId)
-          ? prevTags.filter((id) => id !== selectedId)
-          : [...prevTags, selectedId]
-      );
+    if (selectedId && !tags.includes(selectedId)) {
+      setTags((prevTags) => [...prevTags, selectedId]);
     }
+  };
+
+  const removeTag = (tagId: number) => {
+    setTags((prevTags) => prevTags.filter((id) => id !== tagId));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -132,6 +131,7 @@ export default function IdeaPage() {
     };
 
     try {
+      setIsLoading(true);
       const response = await fetch("http://37.27.182.28:3001/v1/ideas", {
         method: "POST",
         headers: {
@@ -142,30 +142,25 @@ export default function IdeaPage() {
         body: JSON.stringify(ideaData),
       });
 
-      if (response.ok) {
+      if (response.status === 201 || response.ok) { // Handle 201 Created
         const data = await response.json();
         console.log("Full API Response:", JSON.stringify(data, null, 2));
-        setShowAlert(true);
-
-        
-        let ideaId = data.payload?.idea?.id;
+        let ideaId = data.payload?.id;
         if (!ideaId) {
-          console.error("ID not found in payload.idea.id, checking alternatives:", data); // 
-        
-          ideaId = data.payload?.id || Object.values(data.payload || {}).find((item: any) => item?.id)?.id;
+          console.error("ID not found in payload.id, checking alternatives:", data);
+          ideaId = Object.values(data.payload || {}).find((item: any) => item?.id)?.id;
         }
 
         if (ideaId) {
-          router.push(`/${lang}/a/ideas/${ideaId}`);
+          setCreateMessage("Idea created. Sent to moderation!");
+          setTimeout(() => {
+            setCreateMessage("");
+            router.push(`/${lang}/a/ideas/${ideaId}`);
+          }, 2000);
         } else {
           console.error("No valid ID found in API response:", data);
           alert("Failed to get idea ID from API response. Check console for details.");
         }
-
-        setTitle("");
-        setTags([]);
-        setDescription("");
-        setIsAnonymous(false);
       } else {
         const errorData = await response.json();
         console.error("Failed to submit idea:", errorData);
@@ -174,9 +169,10 @@ export default function IdeaPage() {
     } catch (error) {
       console.error("Error:", error);
       alert("An error occurred.");
+    } finally {
+      setIsLoading(false);
     }
   };
-
 
   if (isLoading) {
     return (
@@ -204,7 +200,7 @@ export default function IdeaPage() {
           </div>
           <div>
             <label className="block text-sm font-light text-slate-700">Tags</label>
-            <Select onValueChange={handleTagChange} value={categories.find((cat) => tags.includes(cat.id))?.name || ""}>
+            <Select onValueChange={handleTagChange} value="">
               <SelectTrigger className="w-full p-2 border border-slate-300 rounded text-black">
                 <SelectValue placeholder="Select categories" />
               </SelectTrigger>
@@ -216,12 +212,13 @@ export default function IdeaPage() {
                 ))}
               </SelectContent>
             </Select>
-            <div className="mt-2">
+            <div className="mt-2 flex flex-wrap gap-2">
               {tags.map((tagId) => {
                 const tagName = categories.find((cat) => cat.id === tagId)?.name;
                 return tagName ? (
-                  <span key={tagId} className="inline-block bg-gray-200 text-gray-800 px-2 py-1 rounded mr-1">
-                    {tagName} (ID: {tagId})
+                  <span key={tagId} className="inline-flex items-center bg-gray-200 text-gray-800 px-2 py-1 rounded mr-1">
+                    {tagName}
+                    <button onClick={() => removeTag(tagId)} className="ml-1 text-red-500 hover:text-red-700">×</button>
                   </span>
                 ) : null;
               })}
@@ -246,7 +243,13 @@ export default function IdeaPage() {
             />
             <label className="text-sm font-light text-slate-700">Anonymous</label>
           </div>
-          <Button type="submit" className="w-full bg-slate-800 text-white hover:bg-slate-700 rounded-none">
+          <Button 
+            type="submit" 
+            className="w-full bg-slate-800 text-white hover:bg-slate-700 rounded-none"
+            onMouseDown={(e) => e.currentTarget.style.transform = 'scale(0.95)'}
+            onMouseUp={(e) => e.currentTarget.style.transform = 'scale(1)'}
+            onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+          >
             Create
           </Button>
         </form>
@@ -255,6 +258,11 @@ export default function IdeaPage() {
             <AlertTitle>Success</AlertTitle>
             <AlertDescription>Post created and sent for moderation!</AlertDescription>
           </Alert>
+        )}
+        {createMessage && (
+          <div className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-green-600 text-white px-4 py-2 rounded shadow-md">
+            {createMessage}
+          </div>
         )}
       </div>
     </div>

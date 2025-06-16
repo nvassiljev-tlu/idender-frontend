@@ -66,27 +66,29 @@ export default function IdenderDashboard() {
   }>>([]);
 
   const fetchNews = async () => {
-  try {
-    const token = Cookie.get('sid');
-    const res = await fetch('http://37.27.182.28:3001/v1/news/recent', {
-      method: 'GET',
-      credentials: 'include',
-      headers: { 
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}` 
+    try {
+      const token = Cookie.get('sid');
+      const res = await fetch('http://37.27.182.28:3001/v1/news/recent', {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setNews(data.payload);
+      } else {
+        console.error('Failed to fetch news');
       }
-    });
-    
-    if (res.ok) {
-      const data = await res.json();
-      setNews(data.payload);
-    } else {
-      console.error('Failed to fetch news');
+    } catch (err) {
+      console.error('Error fetching news:', err);
     }
-  } catch (err) {
-    console.error('Error fetching news:', err);
-  }
-};
+  };
+
+  useClickOutside(profileMenuRef, () => setShowProfileMenu(false));
 
   useEffect(() => {
     const token = Cookie.get('sid');
@@ -170,12 +172,12 @@ export default function IdenderDashboard() {
       <main className="w-full max-w-6xl mx-auto p-4 flex-1 overflow-y-auto pt-16 min-w-[320px]">
         <section className="mb-20 w-full max-w-5xl min-w-[320px] sm:min-w-[600px] mx-auto">
           <div className="flex items-center gap-2 mb-4">
-            <NewspaperIcon/>
+            <NewspaperIcon />
             <h2 className="text-xl font-bold text-slate-800">News</h2>
           </div>
-          
+
           {error && (
-            <div className="mb-4 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 w-full"></div>
+            <div className="mb-4 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 w-full">{error}</div>
           )}
 
           {news.length === 0 ? (
@@ -185,7 +187,7 @@ export default function IdenderDashboard() {
                 <button onClick={fetchNews} className="text-blue-600 hover:text-blue-800 text-sm">Refresh</button>
               </div>
             </div>
-        ) : (
+          ) : (
             <div className="grid gap-4 w-full">
               {news.map(item => (
                 <div key={item.id} className="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow">

@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import Cookie from "js-cookie"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import {
   Form,
   FormControl,
@@ -16,6 +16,8 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
+import { useTranslation } from "react-i18next";
+import i18n from '../app/i18n/client';
 
 const formSchema = z.object({
   email: z.string().email(),
@@ -27,6 +29,18 @@ export function LoginForm() {
   const router = useRouter()
   const params = useParams()
   const lang = typeof params.lang === "string" ? params.lang : "et"
+  const { t } = useTranslation('common');
+
+  useEffect(() => {
+    // Change language and wait before rendering
+    const changeLang = async () => {
+      if (i18n.language !== lang) {
+        await i18n.changeLanguage(lang);
+        Cookie.set('lang', lang);
+      }
+    };
+    changeLang();
+  }, [lang, router]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -71,7 +85,7 @@ export function LoginForm() {
               <FormLabel>Email</FormLabel>
               <FormControl>
                 <Input
-                  placeholder="Email"
+                  placeholder={t('email')}
                   className="text-slate-900 h-auto w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-slate-700"
                   required
                   {...field}
@@ -90,7 +104,7 @@ export function LoginForm() {
               <FormControl>
                 <Input
                   type="password"
-                  placeholder="Password"
+                  placeholder={t('password')}
                   className="text-slate-900 h-auto w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-slate-700"
                   required
                   {...field}
@@ -105,7 +119,7 @@ export function LoginForm() {
           type="submit"
           className="w-full bg-slate-800 text-white py-2 px-4 rounded hover:bg-slate-500 transition duration-200"
         >
-          Log In
+          {t('submit')}
         </button>
       </form>
       <div className="mt-4 text-center text-sm text-slate-600">
@@ -114,11 +128,11 @@ export function LoginForm() {
           onClick={() => router.push(`/${lang}/forgot-password`)}
           className="text-slate-700 hover:underline"
         >
-          Forgot password?
+          {t('forgotPassword')}
         </button>
         <span className="mx-2">•</span>
         <Link href={`/${lang}/signup`} className="text-slate-700 hover:underline">
-          Sign Up
+          {t('signupBtn')}
         </Link>
       </div>
     </Form>
