@@ -18,6 +18,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { useTranslation } from "react-i18next";
 import i18n from '../app/i18n/client';
+import  { Loader2 } from "lucide-react";
 
 const formSchema = z.object({
   email: z.string().email(),
@@ -26,6 +27,7 @@ const formSchema = z.object({
 
 export function LoginForm() {
   const [error, setError] = useState("")
+  const [loading, setLoading] = useState(false)
   const router = useRouter()
   const params = useParams()
   const lang = typeof params.lang === "string" ? params.lang : "et"
@@ -51,6 +53,7 @@ export function LoginForm() {
   })
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    setLoading(true); // Start loading
     try {
       const response = await fetch("http://37.27.182.28:3001/v1/oauth/login", {
         method: "POST",
@@ -71,6 +74,8 @@ export function LoginForm() {
       }
     } catch (err) {
       setError("An error occurred during login")
+    } finally {
+      setLoading(false); // Stop loading
     }
   }
 
@@ -117,8 +122,12 @@ export function LoginForm() {
         {error && <div className="text-red-500 mb-4">{error}</div>}
         <button
           type="submit"
-          className="w-full bg-slate-800 text-white py-2 px-4 rounded hover:bg-slate-500 transition duration-200"
+          className="w-full bg-slate-800 text-white py-2 px-4 rounded hover:bg-slate-500 transition duration-200 flex items-center justify-center"
+          disabled={loading}
         >
+          {loading ? (
+            <Loader2 className="animate-spin h-5 w-5 mr-2" />
+          ) : null}
           {t('submit')}
         </button>
       </form>

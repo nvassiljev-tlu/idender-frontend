@@ -11,6 +11,8 @@ type Idea = {
   id: string;
   title: string;
   description: string;
+  author?: string;
+  categories?: { id: number; name: string }[];
 };
 
 export default function VotingPage() {
@@ -93,7 +95,13 @@ export default function VotingPage() {
 
       const data = await res.json();
       if (data.status === 'OPERATION-OK' && data.payload) {
-        setIdea(data.payload);
+        setIdea({
+          id: data.payload.id,
+          title: data.payload.title,
+          description: data.payload.description,
+          author: data.payload.author,
+          categories: data.payload.categories || [],
+        });
       } else {
         setIdea(null);
       }
@@ -258,6 +266,27 @@ export default function VotingPage() {
         <div className="relative z-10">
           <h2 className="text-lg sm:text-xl font-bold mb-3 text-black">{idea.title}</h2>
           <p className="text-gray-800 text-base sm:text-lg">{idea.description}</p>
+        </div>
+
+        {/* Author and categories at the bottom */}
+        <div className="relative z-10 mt-6">
+          {idea.categories && idea.categories.length > 0 && (
+            <div className="flex flex-wrap gap-2 justify-center mb-2">
+              {idea.categories.map((cat) => (
+                <span
+                  key={cat.id}
+                  className="bg-slate-600 text-white px-2 py-1 rounded text-xs"
+                >
+                  {cat.name}
+                </span>
+              ))}
+            </div>
+          )}
+          {idea.author && (
+            <div className="text-xs text-gray-500 mt-1">
+              Submitted by: {idea.author}
+            </div>
+          )}
         </div>
       </div>
 

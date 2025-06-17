@@ -103,7 +103,7 @@ export default function Header() {
   );
 
   return (
-    <header className="bg-slate-800 text-white p-4 flex justify-between items-center sticky top-0 z-10 w-full">
+    <header className="bg-slate-800 text-white p-4 flex justify-between items-center sticky top-0 z-20 w-full">
       <button
         onClick={handleLogout}
         className="flex items-center gap-2 hover:text-slate-300 transition-colors"
@@ -132,7 +132,7 @@ export default function Header() {
 
         {showProfileMenu && (
           <div
-            className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-20"
+            className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50" // <-- z-50 instead of z-20
             onMouseLeave={() => setShowProfileMenu(false)}
           >
             <button
