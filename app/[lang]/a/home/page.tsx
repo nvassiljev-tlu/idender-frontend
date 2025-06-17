@@ -161,14 +161,14 @@ export default function IdenderDashboard() {
 
   if (isLoading) {
     return (
-      <div className="fixed inset-0 bg-slate-500 flex items-center justify-center z-50">
+      <div className="fixed inset-0 bg-slate-100 flex items-center justify-center z-50">
         <Loader2 className="h-8 w-8 animate-spin text-white" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-100 text-slate-800 flex flex-col min-w-[320px]">
+    <div className="min-h-screen bg-slate-200 text-slate-800 flex flex-col min-w-[320px] rounded-t-2xl">
       <main className="w-full max-w-6xl mx-auto p-4 flex-1 overflow-y-auto pt-16 min-w-[320px]">
         <section className="mb-20 w-full max-w-5xl min-w-[320px] sm:min-w-[600px] mx-auto">
           <div className="flex items-center gap-2 mb-4">
@@ -188,13 +188,13 @@ export default function IdenderDashboard() {
               </div>
             </div>
           ) : (
-            <div className="grid gap-4 w-full">
+            <div className="grid gap-3 w-full">
               {news.map(item => (
-                <div key={item.id} className="bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow">
-                  <h3 className="font-medium text-slate-800">{item.title}</h3>
-                  <p className="text-sm text-slate-500 mt-1">{formatDate(item.created_at, lang)}</p>
+                <div key={item.id} className="bg-white p-3 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                  <h3 className="font-medium text-base text-slate-800">{item.title}</h3>
+                  <p className="text-xs text-slate-500 mt-1">{formatDate(item.created_at, lang)}</p>
                   {item.description && (
-                    <p className="mt-2 text-slate-600">{item.description}</p>
+                    <p className="mt-2 text-xs text-slate-600">{item.description}</p>
                   )}
                 </div>
               ))}
