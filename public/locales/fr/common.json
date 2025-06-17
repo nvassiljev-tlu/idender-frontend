@@ -91,5 +91,35 @@
   "filterByStatus": "Filtrer par statut",
   "noIdeas1": "Aucune idée avec ce statut.",
   "approve": "Approuver",
-  "decline": "Rejeter"
+  "decline": "Rejeter",
+  "newIdea1": {
+  "title": "Nouvelle idée",
+  "form": {
+    "title": "Titre",
+    "tags": "Tags",
+    "description": "Description",
+    "anonymous": "Anonyme",
+    "create": "Créer",
+    "select": "Sélectionner des catégories",
+    "placeholderTitle": "Ajouter plus d'options de snacks payants",
+    "placeholderDescription": "Veuillez ajouter des snacks comme Lay's ou Pringles"
+  },
+  "alert": {
+    "title": "Succès",
+    "description": "Publication créée et envoyée à la modération !"
+  },
+  "success": "Idée créée. Envoyée en modération !",
+  "authRequired": "Vous devez être connecté pour soumettre une idée.",
+  "errorId": "Impossible de trouver l'ID de l'idée dans la réponse de l'API. Voir la console.",
+  "errorSubmit": "Échec de la soumission de l'idée",
+  "generalError": "Une erreur s'est produite."
+},
+"header": {
+  "logout": "Déconnexion",
+  "myProfile": "Mon profil",
+  "myIdeas": "Mes idées",
+  "allIdeas": "Toutes les idées",
+  "allUsers": "Tous les utilisateurs"
+}
+
 }

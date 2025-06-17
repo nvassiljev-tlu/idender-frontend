@@ -91,7 +91,36 @@
   "filterByStatus": "Filtreeri staatuse järgi",
   "noIdeas1": "Selle staatusega ideid pole.",
   "approve": "Kinnita",
-  "decline": "Lükka tagasi"
+  "decline": "Lükka tagasi",
+  "newIdea1": {
+  "title": "Uus idee",
+  "form": {
+    "title": "Pealkiri",
+    "tags": "Sildid",
+    "description": "Kirjeldus",
+    "anonymous": "Anonüümne",
+    "create": "Loo",
+    "select": "Vali kategooriad",
+    "placeholderTitle": "Lisa rohkem tasulisi snäkivalikuid",
+    "placeholderDescription": "Palun lisa snäkke nagu Lay's või Pringles"
+  },
+  "alert": {
+    "title": "Edu",
+    "description": "Postitus loodud ja saadetud modereerimiseks!"
+  },
+  "success": "Idee loodud. Saadetud modereerimisele!",
+  "authRequired": "Idee esitamiseks pead olema sisse logitud.",
+  "errorId": "API vastusest ei leitud idee ID-d. Kontrolli konsooli.",
+  "errorSubmit": "Idee esitamine ebaõnnestus",
+  "generalError": "Tekkis viga."
+},
+"header": {
+  "logout": "Logi välja",
+  "myProfile": "Minu profiil",
+  "myIdeas": "Minu ideed",
+  "allIdeas": "Kõik ideed",
+  "allUsers": "Kõik kasutajad"
+}
 
  }
 

@@ -91,6 +91,34 @@
   "filterByStatus": "Filter by status",
   "noIdeas1": "No ideas with this status.",
   "approve": "Approve",
-  "decline": "Decline"
-
+  "decline": "Decline",
+  "newIdea1": {
+  "title": "New Idea",
+  "form": {
+    "title": "Title",
+    "tags": "Tags",
+    "description": "Description",
+    "anonymous": "Anonymous",
+    "create": "Create",
+    "select": "Select categories",
+    "placeholderTitle": "Add more paid snacks options",
+    "placeholderDescription": "Please add some snacks like Lay's or Pringles"
+  },
+  "alert": {
+    "title": "Success",
+    "description": "Post created and sent for moderation!"
+  },
+  "success": "Idea created. Sent to moderation!",
+  "authRequired": "You must be logged in to submit an idea.",
+  "errorId": "Failed to get idea ID from API response. Check console for details.",
+  "errorSubmit": "Failed to submit idea",
+  "generalError": "An error occurred."
+},
+"header": {
+  "logout": "Logout",
+  "myProfile": "My Profile",
+  "myIdeas": "My Ideas",
+  "allIdeas": "All Ideas",
+  "allUsers": "All Users"
+}
 }
