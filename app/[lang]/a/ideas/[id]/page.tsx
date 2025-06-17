@@ -31,7 +31,6 @@ function IdeaDetailPageContent() {
   const [newStatus, setNewStatus] = useState(null);
   const [loading, setLoading] = useState(true);
   const [statusMessage, setStatusMessage] = useState("");
-  const [lang, setLang] = useState("");
 
   const statusMap = {
     0: t("status.created"),
@@ -52,9 +51,7 @@ function IdeaDetailPageContent() {
   };
 
   useEffect(() => {
-    // --- Merge: Language logic ---
     const language = Cookie.get("lang") || 'et';
-    setLang(language);
 
     const changeLang = async () => {
       if (i18n.language !== language) {
@@ -62,7 +59,6 @@ function IdeaDetailPageContent() {
       }
     };
     changeLang();
-    // --- End merge ---
 
     const fetchData = async () => {
       setLoading(true);
@@ -138,13 +134,14 @@ function IdeaDetailPageContent() {
       } catch (err) {
         setError(t("error.loading"));
         setComments([]);
+        console.error("Error fetching idea or comments:", err);
       } finally {
         setLoading(false);
       }
     };
 
     fetchData();
-  }, [id]);
+  }, [id, t]);
 
   const handleAddComment = async () => {
     if (!newComment.trim()) return;
@@ -173,6 +170,7 @@ function IdeaDetailPageContent() {
         setNewComment("");
       }
     } catch (err) {
+      console.error("Error adding comment:", err);
       setError("An error occurred while adding comment.");
     }
   };
@@ -193,6 +191,7 @@ function IdeaDetailPageContent() {
         ));
       }
     } catch (err) {
+      console.error("Error deleting comment:", err);
       setError("An error occurred while deleting comment.");
     }
   };
@@ -215,6 +214,7 @@ function IdeaDetailPageContent() {
         setTimeout(() => setStatusMessage(""), 2000);
       }
     } catch (err) {
+      console.error("Error updating status:", err);
       setError("An error occurred while updating status.");
     }
   };
