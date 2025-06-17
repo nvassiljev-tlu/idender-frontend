@@ -1,11 +1,14 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Cookie from 'js-cookie';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Loader2, XCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+
+import i18n from '../../../../i18n/client';
 
 type Idea = {
   id: string;
@@ -18,45 +21,65 @@ type Idea = {
   is_anonymus?: number;
 };
 
-const statusMap: Record<number, string> = {
-  0: 'Created / Pending Moderation',
-  1: 'On Voting',
-  2: 'Pending School Administration Decision',
-  3: 'Approved',
-  4: 'Declined (by School)',
-  5: 'Declined (Moderation)',
-};
-
 export default function AllIdeasAdminPage() {
+  const { t } = useTranslation('common');
   const [ideas, setIdeas] = useState<Idea[]>([]);
   const [statusFilter, setStatusFilter] = useState<number>(0);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
   const [lang, setLang] = useState('et');
+  const [i18nReady, setI18nReady] = useState(false);
   const router = useRouter();
 
-  const fetchIdeas = async () => {
-    setLoading(true);
-    try {
-      const token = Cookie.get('sid');
-      const res = await fetch(`http://37.27.182.28:3001/v1/ideas`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        credentials: 'include',
-      });
-      const data = await res.json();
-      if (res.ok && data.status === 'OPERATION-OK') {
-        setIdeas(data.payload);
-      } else {
-        setError('Failed to load ideas.');
+  useEffect(() => {
+    const language = Cookie.get('lang') || 'et';
+    setLang(language);
+
+    const initLang = async () => {
+      if (i18n.language !== language) {
+        await i18n.changeLanguage(language);
       }
-    } catch {
-      setError('Could not connect to server.');
-    } finally {
-      setLoading(false);
-    }
-  };
+      setI18nReady(true);
+    };
+
+    initLang();
+  }, []);
+
+  useEffect(() => {
+    if (!i18nReady) return;
+
+    const fetchIdeas = async () => {
+      setLoading(true);
+      try {
+        const token = Cookie.get('sid');
+        const res = await fetch(`http://37.27.182.28:3001/v1/ideas`, {
+          headers: { Authorization: `Bearer ${token}` },
+          credentials: 'include',
+        });
+        const data = await res.json();
+        if (res.ok && data.status === 'OPERATION-OK') {
+          setIdeas(data.payload);
+        } else {
+          setError(t('error.loadIdeas'));
+        }
+      } catch {
+        setError(t('error.connectServer'));
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchIdeas();
+  }, [i18nReady]);
+
+  const statusMap = useMemo(() => ({
+    0: t('status3.created'),
+    1: t('status3.voting'),
+    2: t('status3.pending_admin'),
+    3: t('status3.approved'),
+    4: t('status3.declined_school'),
+    5: t('status3.declined_moderation'),
+  }), [t]);
 
   const handleChangeStatus = async (id: string, newStatus: number) => {
     try {
@@ -78,38 +101,40 @@ export default function AllIdeasAdminPage() {
           )
         );
       } else {
-        setError('Failed to update idea status.');
+        setError(t('error.updateStatus'));
       }
     } catch {
-      setError('Could not connect to server.');
+      setError(t('error.connectServer'));
     }
   };
 
-  useEffect(() => {
-    fetchIdeas();
-    const language = Cookie.get('lang') || 'et';
-    setLang(language);
-  }, []);
-
   const filteredIdeas = ideas.filter((idea) => idea.status === statusFilter);
+
+  if (!i18nReady) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-500 text-white">
+        <Loader2 className="w-8 h-8 animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-500 text-white px-4 py-8 flex flex-col items-center">
       <div className="w-full max-w-2xl bg-slate-600 p-6 rounded-lg shadow space-y-4">
-        <h1 className="text-2xl font-bold mb-6">All Ideas (Admin View)</h1>
+        <h1 className="text-2xl font-bold mb-6">{t('allIdeas.title')}</h1>
 
         {error && (
           <Alert className="border-red-500 bg-red-100 text-red-700">
             <XCircle className="h-5 w-5" />
             <div>
-              <AlertTitle>Error</AlertTitle>
+              <AlertTitle>{t('error.title')}</AlertTitle>
               <AlertDescription>{error}</AlertDescription>
             </div>
           </Alert>
         )}
 
         <div className="sticky top-0 bg-slate-600 z-10">
-          <label className="block mb-2">Status Filter:</label>
+          <label className="block mb-2">{t('filterByStatus')}</label>
           <select
             className="p-2 rounded bg-slate-700 text-white w-full max-w-xs"
             value={statusFilter}
@@ -130,7 +155,7 @@ export default function AllIdeasAdminPage() {
         ) : (
           <div className="space-y-4 max-h-[60vh] overflow-y-auto">
             {filteredIdeas.length === 0 ? (
-              <p className="text-center text-gray-400">No ideas with this status.</p>
+              <p className="text-center text-gray-400">{t('noIdeas1')}</p>
             ) : (
               filteredIdeas.map((idea) => (
                 <div
@@ -146,13 +171,10 @@ export default function AllIdeasAdminPage() {
                       {idea.description}
                     </p>
                     <p className="text-sm text-slate-400 line-clamp-1 text-ellipsis">
-                      Author:{' '}
-                      {idea.is_anonymus === 1
-                        ? 'Anonymous'
-                        : `${idea.first_name ?? ''} ${idea.last_name ?? ''}`}
+                      {t('submittedBy')}: {idea.is_anonymus === 1 ? 'Anonymous' : `${idea.first_name ?? ''} ${idea.last_name ?? ''}`}
                     </p>
                     <p className="text-sm font-semibold line-clamp-1 text-ellipsis">
-                      Status: {statusMap[idea.status]}
+                      {t('status.label')}: {statusMap[idea.status]}
                     </p>
                   </div>
 
@@ -166,7 +188,7 @@ export default function AllIdeasAdminPage() {
                           handleChangeStatus(idea.id, 1);
                         }}
                       >
-                        Approve
+                        {t('approve')}
                       </Button>
                       <Button
                         size="sm"
@@ -176,7 +198,7 @@ export default function AllIdeasAdminPage() {
                           handleChangeStatus(idea.id, 5);
                         }}
                       >
-                        Decline
+                        {t('decline')}
                       </Button>
                     </div>
                   )}
