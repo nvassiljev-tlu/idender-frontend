@@ -45,13 +45,13 @@ export default function LoginPage() {
         } else {
           setLoading(false);
         }
-      } catch (err) {
+      } catch (_err) {
         setError(t('errorConnection'));
         setLoading(false);
       }
     };
     checkLogin();
-  }, [lang, router]);
+  }, [lang, router, t]);
 
   if (!ready || loading) {
     return (

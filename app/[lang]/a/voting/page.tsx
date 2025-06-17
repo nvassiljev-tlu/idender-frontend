@@ -34,6 +34,9 @@ export default function VotingPage() {
   };
 
   useEffect(() => {
+
+    if (isLoading) return;
+
     const checkSession = async () => {
       try {
         const token = Cookie.get('sid');
@@ -73,6 +76,7 @@ export default function VotingPage() {
     checkSession();
   }, [router]);
 
+useEffect(() => {
   const fetchIdea = async () => {
     setIsFetchingIdea(true);
     try {
@@ -114,10 +118,10 @@ export default function VotingPage() {
     }
   };
 
-  useEffect(() => {
-    if (isLoading) return;
+  if (!isLoading) {
     fetchIdea();
-  }, [isLoading]);
+  }
+}, [isLoading]);
 
   const handlePointerDown = (e: React.PointerEvent) => {
     startX.current = e.clientX;
