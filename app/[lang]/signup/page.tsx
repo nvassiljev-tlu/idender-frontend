@@ -42,9 +42,9 @@ export default function SignupPage() {
     setShowAlert(true);
   };
 
-  const handleSignup = async (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const form = e.target as HTMLFormElement;
+    const form = e.currentTarget;
     const email = (form.elements.namedItem('email') as HTMLInputElement).value.trim();
     const firstName = (form.elements.namedItem('firstName') as HTMLInputElement).value.trim();
     const lastName = (form.elements.namedItem('lastName') as HTMLInputElement).value.trim();
@@ -70,18 +70,19 @@ export default function SignupPage() {
         body: JSON.stringify({ email, first_name: firstName, last_name: lastName, password }),
       });
 
-      const data = await res.json();
+      const data: Record<string, unknown> = await res.json();
 
       if (res.status === 201) {
         setUserEmail(email);
         setShowOtpPopup(true);
         setShowAlert(false);
       } else {
-        const message = data?.errors || t('networkError');
+        const message = (data?.errors as string) || t('networkError');
         showError(t('signupFailed'), message);
       }
-    } catch (err: any) {
-      showError(t('signupFailed'), err?.message || t('networkError'));
+    } catch (err) {
+      const message = err instanceof Error ? err.message : t('networkError');
+      showError(t('signupFailed'), message);
     }
   };
 
@@ -98,7 +99,7 @@ export default function SignupPage() {
         body: JSON.stringify({ email: userEmail, code: otp }),
       });
 
-      const data = await res.json();
+      const data: Record<string, unknown> = await res.json();
 
       if (res.status === 200) {
         setAlertType('success');
@@ -107,19 +108,18 @@ export default function SignupPage() {
         setShowAlert(true);
         setTimeout(() => router.push(`/${lang}/login`), 2000);
       } else {
-        showError(t('otpFailed'), data?.message || t('invalidOtp'));
+        showError(t('otpFailed'), (data?.message as string) || t('invalidOtp'));
       }
-    } catch (err: any) {
-      showError(t('otpFailed'), err?.message || t('networkError'));
+    } catch (err) {
+      const message = err instanceof Error ? err.message : t('networkError');
+      showError(t('otpFailed'), message);
     }
   };
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-slate-500 text-slate-800 font-sans px-4">
       <div className="bg-white backdrop-blur-sm p-6 rounded-xl shadow-lg max-w-sm w-full">
-        <h1 className="text-4xl sm:text-6xl md:text-5xl font-bold text-slate-700 text-center mb-4">
-          Idender
-        </h1>
+        <h1 className="text-4xl sm:text-6xl md:text-5xl font-bold text-slate-700 text-center mb-4">Idender</h1>
         <h2 className="text-lg font-bold text-center mb-4">{t('signup1')}</h2>
 
         {showAlert && (
@@ -144,7 +144,7 @@ export default function SignupPage() {
             </Button>
 
             <p className="text-center text-sm mt-2 text-slate-700">
-              {t('alreadyAccount')}{" "}
+              {t('alreadyAccount')}{' '}
               <a href={`/${lang}/login`} className="underline hover:text-slate-500">
                 {t('loginHere')}
               </a>
@@ -155,7 +155,7 @@ export default function SignupPage() {
             <label className="block text-sm mb-1 text-slate-700">{t('otpPrompt')}</label>
             <InputOTP maxLength={6} pattern={REGEXP_ONLY_DIGITS} value={otp} onChange={setOtp}>
               <InputOTPGroup>
-                {[0, 1, 2, 3, 4, 5].map(i => <InputOTPSlot key={i} index={i} />)}
+                {[0, 1, 2, 3, 4, 5].map((i) => <InputOTPSlot key={i} index={i} />)}
               </InputOTPGroup>
             </InputOTP>
 
