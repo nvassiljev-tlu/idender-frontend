@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Cookie from 'js-cookie';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -26,6 +26,18 @@ type User = {
   is_superadmin?: boolean;
 };
 
+type RawUser = {
+  id: string;
+  first_name?: string;
+  last_name?: string;
+  email?: string;
+  lang?: string;
+  profile_picture?: string;
+  is_active?: boolean;
+  is_admin?: boolean;
+  is_superadmin?: boolean;
+};
+
 export default function AllUsersAdminPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -38,7 +50,7 @@ export default function AllUsersAdminPage() {
   const [transferEmail, setTransferEmail] = useState('');
   const [transferError, setTransferError] = useState('');
 
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     setLoading(true);
     setError('');
     try {
@@ -56,8 +68,8 @@ export default function AllUsersAdminPage() {
         }),
       ]);
 
-      const usersData = await usersRes.json();
-      const currentUserData = await currentUserRes.json();
+      const usersData: { payload: RawUser[]; status: string } = await usersRes.json();
+      const currentUserData: { payload: { user: RawUser }; status: string } = await currentUserRes.json();
 
       if (
         usersRes.ok &&
@@ -65,7 +77,7 @@ export default function AllUsersAdminPage() {
         currentUserRes.ok &&
         currentUserData.status === 'OPERATION-OK'
       ) {
-        const userList = usersData.payload.map((user: any) => ({
+        const userList: User[] = usersData.payload.map((user) => ({
           id: user.id,
           first_name: user.first_name ?? '',
           last_name: user.last_name ?? '',
@@ -78,7 +90,7 @@ export default function AllUsersAdminPage() {
         }));
 
         const u = currentUserData.payload.user;
-        const current = {
+        const current: User = {
           id: u.id,
           first_name: u.first_name ?? '',
           last_name: u.last_name ?? '',
@@ -91,7 +103,7 @@ export default function AllUsersAdminPage() {
         };
 
         setCurrentUser(current);
-        setUsers([current, ...userList.filter((u: User) => u.id !== current.id)]);
+        setUsers([current, ...userList.filter((u) => u.id !== current.id)]);
       } else {
         setError('Failed to fetch users or current user.');
       }
@@ -100,7 +112,7 @@ export default function AllUsersAdminPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [router]);
 
   const updateUserStatus = async (id: string, activate: boolean) => {
     setError('');
@@ -122,8 +134,9 @@ export default function AllUsersAdminPage() {
       }
 
       updateUser(id, { is_active: activate });
-    } catch (err: any) {
-      setError(err.message || `Failed to ${activate ? 'activate' : 'deactivate'} user.`);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Unexpected error';
+      setError(message || `Failed to ${activate ? 'activate' : 'deactivate'} user.`);
     }
   };
 
@@ -136,45 +149,41 @@ export default function AllUsersAdminPage() {
     }
   };
 
-  // Обновлённая функция assignRole с тремя ролями
   const assignRole = async (id: string, role: 'user' | 'admin' | 'superadmin') => {
-  setError('');
-  try {
-    const token = Cookie.get('sid');
-    let scopeIds: number[] = [];
+    setError('');
+    try {
+      const token = Cookie.get('sid');
+      let scopeIds: number[] = [];
 
-    if (role === 'user') {
-      scopeIds = [1]; // <-- Сохраняем базовый доступ
-    } else if (role === 'admin') {
-      scopeIds = [1, 3];
-    } else if (role === 'superadmin') {
-      scopeIds = [1, 3, 15];
+      if (role === 'user') scopeIds = [1];
+      else if (role === 'admin') scopeIds = [1, 3];
+      else if (role === 'superadmin') scopeIds = [1, 3, 15];
+
+      const res = await fetch(`http://37.27.182.28:3001/v1/users/${id}/scopes`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        credentials: 'include',
+        body: JSON.stringify({ scopeIds }),
+      });
+
+      const data = await res.json();
+      if (!res.ok || data.status !== 'OPERATION-OK') {
+        throw new Error(data.error?.message || 'Failed to assign role.');
+      }
+
+      updateUser(id, {
+        is_admin: role === 'admin' || role === 'superadmin',
+        is_superadmin: role === 'superadmin',
+      });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Unexpected error';
+      setError(message);
+      throw err;
     }
-
-    const res = await fetch(`http://37.27.182.28:3001/v1/users/${id}/scopes`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-      credentials: 'include',
-      body: JSON.stringify({ scopeIds }),
-    });
-
-    const data = await res.json();
-    if (!res.ok || data.status !== 'OPERATION-OK') {
-      throw new Error(data.error?.message || 'Failed to assign role.');
-    }
-
-    updateUser(id, {
-      is_admin: role === 'admin' || role === 'superadmin',
-      is_superadmin: role === 'superadmin',
-    });
-  } catch (err: any) {
-    setError(err.message || 'Failed to update role.');
-    throw err;
-  }
-};
+  };
 
   const checkAdminCount = () => {
     return users.filter((u) => u.is_admin && u.is_active).length;
@@ -199,6 +208,7 @@ export default function AllUsersAdminPage() {
       setTransferError('Email is required');
       return;
     }
+
     const target = users.find(
       (u) => u.email.toLowerCase() === transferEmail.toLowerCase() && u.is_active
     );
@@ -217,14 +227,15 @@ export default function AllUsersAdminPage() {
       setTransferAdminOpenFor(null);
       setTransferEmail('');
       setError('');
-    } catch (e: any) {
-      setTransferError(e.message || 'Transfer failed');
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : 'Unexpected error';
+      setTransferError(message || 'Transfer failed');
     }
   };
 
   useEffect(() => {
     fetchUsers();
-  }, []);
+  }, [fetchUsers]);
 
   if (loading) {
     return (

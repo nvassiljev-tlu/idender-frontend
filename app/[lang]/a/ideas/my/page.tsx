@@ -81,7 +81,6 @@ export default function MyIdeasPage() {
     };
 
     checkLogin();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [t]);
 
   useEffect(() => {
@@ -116,7 +115,6 @@ export default function MyIdeasPage() {
     };
 
     fetchIdeas();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId, t]);
 
   const handleIdeaClick = (ideaId: string) => {

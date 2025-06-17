@@ -9,11 +9,24 @@ import { Button } from "@/components/ui/button";
 import { Trash2, Loader2 } from "lucide-react";
 import i18n from '../../../../i18n/client';
 
-function IdeaDetailPageContent() {
-  const { id } = useParams();
-  const { t } = useTranslation('common');
-  const [idea, setIdea] = useState(null);
-  type Comment = {
+interface Idea {
+  title: string;
+  description: string;
+  status: number;
+  categories: Array<{ id: number; name: string }>;
+  first_name: string;
+  last_name: string;
+  is_anonymus?: number;
+}
+
+interface ApiResponse {
+  payload: {
+    idea: Idea;
+    is_admin: boolean;
+  };
+}
+
+type Comment = {
     id: number;
     content: string;
     created_at: string;
@@ -22,17 +35,22 @@ function IdeaDetailPageContent() {
     suggestion_id: number;
     first_name: string;
     last_name: string;
-  };
+};
+
+function IdeaDetailPageContent() {
+  const { id } = useParams();
+  const { t } = useTranslation('common');
+  const [idea, setIdea] = useState<Idea | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState("");
   const [error, setError] = useState("");
   const [voteCount, setVoteCount] = useState({ likes: 0, dislikes: 0 });
   const [isAdmin, setIsAdmin] = useState(false);
-  const [newStatus, setNewStatus] = useState(null);
+  const [newStatus, setNewStatus] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [statusMessage, setStatusMessage] = useState("");
 
-  const statusMap = {
+  const statusMap: Record<number, string> = {
     0: t("status.created"),
     1: t("status.voting"),
     2: t("status.pending_admin"),
@@ -41,7 +59,7 @@ function IdeaDetailPageContent() {
     5: t("status.declined_moderation"),
   };
 
-  const getNextAllowedStatuses = (currentStatus) => {
+  const getNextAllowedStatuses = (currentStatus: number) => {
     switch (currentStatus) {
       case 0: return [1, 5];
       case 1: return [2];
@@ -76,7 +94,7 @@ function IdeaDetailPageContent() {
         });
 
         if (ideaResponse.ok) {
-          const data = await ideaResponse.json();
+          const data = await ideaResponse.json() as ApiResponse;
           const ideaData = data.payload.idea;
 
           if (ideaData.is_anonymus === 1 && !data.payload.is_admin) {
@@ -116,9 +134,9 @@ function IdeaDetailPageContent() {
         if (commentsResponse.ok) {
           const data = await commentsResponse.json();
           const formattedComments = Array.isArray(data.payload)
-            ? data.payload.map((c) => ({
+            ? data.payload.map((c: Comment) => ({
                 id: c.id,
-                content: c.comment,
+                content: c.content,
                 created_at: c.created_at,
                 deleted_at: c.deleted_at,
                 user_id: c.user_id,
@@ -175,7 +193,7 @@ function IdeaDetailPageContent() {
     }
   };
 
-  const handleDeleteComment = async (commentId) => {
+  const handleDeleteComment = async (commentId: number) => {
     if (!isAdmin) return;
     try {
       const token = Cookie.get("sid");
@@ -197,7 +215,7 @@ function IdeaDetailPageContent() {
   };
 
   const handleStatusChange = async () => {
-    if (!isAdmin || newStatus === null) return;
+    if (!isAdmin || typeof newStatus !== 'number') return;
     try {
       const token = Cookie.get("sid");
       const response = await fetch(`http://37.27.182.28:3001/v1/ideas/${id}/status`, {
@@ -243,7 +261,7 @@ function IdeaDetailPageContent() {
       <h1 className="text-2xl font-bold mb-4">{idea.title || t("loading.title")}</h1>
       <p className="mb-4">{idea.description || t("loading.description")}</p>
 
-      <p className="mb-4">{t("status.label")}: {statusMap[idea.status]}</p>
+      <p className="mb-4">{t("status.label")}: {statusMap[idea.status as keyof typeof statusMap]}</p>
 
       {idea.categories?.length > 0 && (
         <div className="mb-4 flex gap-2 flex-wrap">

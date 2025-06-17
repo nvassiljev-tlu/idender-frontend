@@ -45,7 +45,8 @@ export default function LoginPage() {
         } else {
           setLoading(false);
         }
-      } catch (_err) {
+      } catch (err) {
+        console.error('Login check error:', err);
         setError(t('errorConnection'));
         setLoading(false);
       }

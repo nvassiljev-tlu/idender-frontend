@@ -74,7 +74,7 @@ export default function VotingPage() {
     };
 
     checkSession();
-  }, [router]);
+  }, [router, isLoading]);
 
 useEffect(() => {
   const fetchIdea = async () => {

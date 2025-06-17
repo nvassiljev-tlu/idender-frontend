@@ -70,9 +70,9 @@ export default function AllIdeasAdminPage() {
     };
 
     fetchIdeas();
-  }, [i18nReady]);
+  }, [i18nReady, t]);
 
-  const statusMap = useMemo(() => ({
+  const statusMap = useMemo<Record<number, string>>(() => ({
     0: t('status3.created'),
     1: t('status3.voting'),
     2: t('status3.pending_admin'),
@@ -80,6 +80,7 @@ export default function AllIdeasAdminPage() {
     4: t('status3.declined_school'),
     5: t('status3.declined_moderation'),
   }), [t]);
+
 
   const handleChangeStatus = async (id: string, newStatus: number) => {
     try {

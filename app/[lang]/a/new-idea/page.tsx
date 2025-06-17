@@ -93,7 +93,6 @@ export default function IdeaPage() {
       }
     };
     fetchCategories();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleTagChange = (value: string) => {
