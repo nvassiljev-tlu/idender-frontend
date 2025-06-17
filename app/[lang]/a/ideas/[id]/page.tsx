@@ -13,7 +13,17 @@ function IdeaDetailPageContent() {
   const { id } = useParams();
   const { t } = useTranslation('common');
   const [idea, setIdea] = useState(null);
-  const [comments, setComments] = useState([]);
+  type Comment = {
+    id: number;
+    content: string;
+    created_at: string;
+    deleted_at: string | null;
+    user_id: number;
+    suggestion_id: number;
+    first_name: string;
+    last_name: string;
+  };
+  const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState("");
   const [error, setError] = useState("");
   const [voteCount, setVoteCount] = useState({ likes: 0, dislikes: 0 });
@@ -21,7 +31,7 @@ function IdeaDetailPageContent() {
   const [newStatus, setNewStatus] = useState(null);
   const [loading, setLoading] = useState(true);
   const [statusMessage, setStatusMessage] = useState("");
-  const [lang, setLang] = useState("")
+  const [lang, setLang] = useState("");
 
   const statusMap = {
     0: t("status.created"),
@@ -42,17 +52,17 @@ function IdeaDetailPageContent() {
   };
 
   useEffect(() => {
+    // --- Merge: Language logic ---
     const language = Cookie.get("lang") || 'et';
-    console.log("Setting language to", language);
+    setLang(language);
 
     const changeLang = async () => {
       if (i18n.language !== language) {
         await i18n.changeLanguage(language);
-        console.log("Language changed to", i18n.language);
       }
     };
-
     changeLang();
+    // --- End merge ---
 
     const fetchData = async () => {
       setLoading(true);
