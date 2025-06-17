@@ -115,10 +115,11 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-slate-500 text-white font-sans px-4">
-      <h1 className="text-2xl font-bold mb-6">IDENDER</h1>
-
-      <div className="bg-slate-600 text-white p-6 rounded-lg shadow w-full max-w-sm">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-slate-500 text-slate-800 font-sans px-4">
+      <div className="bg-white backdrop-blur-sm p-6 rounded-xl shadow-lg max-w-sm w-full">
+        <h1 className="text-4xl sm:text-6xl md:text-5xl font-bold text-slate-700 text-center mb-4">
+          Idender
+        </h1>
         <h2 className="text-lg font-bold text-center mb-4">{t('signup1')}</h2>
 
         {showAlert && (
@@ -138,27 +139,27 @@ export default function SignupPage() {
             <InputField id="lastName" type="text" label={t('lastName')} placeholder="Maasikas" />
             <InputField id="password" type="password" label={t('password1')} placeholder="********" />
 
-            <Button type="submit" className="w-full bg-white text-slate-700 hover:bg-slate-300 rounded-none">
+            <Button type="submit" className="w-full bg-slate-800 text-white hover:bg-slate-700 rounded-none">
               {t('signupBtn')}
             </Button>
 
-            <p className="text-center text-sm mt-2 text-white">
+            <p className="text-center text-sm mt-2 text-slate-700">
               {t('alreadyAccount')}{" "}
-              <a href={`/${lang}/login`} className="underline hover:text-gray-300">
+              <a href={`/${lang}/login`} className="underline hover:text-slate-500">
                 {t('loginHere')}
               </a>
             </p>
           </form>
         ) : (
           <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); handleVerifyOtp(); }}>
-            <label className="block text-sm mb-1 text-white">{t('otpPrompt')}</label>
+            <label className="block text-sm mb-1 text-slate-700">{t('otpPrompt')}</label>
             <InputOTP maxLength={6} pattern={REGEXP_ONLY_DIGITS} value={otp} onChange={setOtp}>
               <InputOTPGroup>
                 {[0, 1, 2, 3, 4, 5].map(i => <InputOTPSlot key={i} index={i} />)}
               </InputOTPGroup>
             </InputOTP>
 
-            <Button type="submit" className="w-full bg-white text-slate-700 hover:bg-slate-300 rounded-none">
+            <Button type="submit" className="w-full bg-slate-800 text-white hover:bg-slate-700 rounded-none">
               {t('verifyOtp')}
             </Button>
           </form>
@@ -171,13 +172,13 @@ export default function SignupPage() {
 function InputField({ id, label, placeholder, type }: { id: string; label: string; placeholder: string; type: string }) {
   return (
     <div>
-      <label htmlFor={id} className="block text-sm mb-1 text-white">{label}</label>
+      <label htmlFor={id} className="block text-sm mb-1 text-slate-700">{label}</label>
       <input
         type={type}
         id={id}
         name={id}
         placeholder={placeholder}
-        className="w-full p-2 border border-slate-400 bg-slate-700 text-white rounded text-sm focus:outline-none focus:ring-2 focus:ring-white"
+        className="w-full p-2 border border-slate-400 bg-white text-slate-800 rounded text-sm focus:outline-none focus:ring-2 focus:ring-slate-800"
       />
     </div>
   );

@@ -35,6 +35,13 @@ export default function ResetPasswordPage() {
     changeLang();
   }, [lang]);
 
+  // Redirect to login if email or code is missing
+  useEffect(() => {
+    if (ready && (!email || !code)) {
+      router.replace(`/${lang}/login`);
+    }
+  }, [ready, email, code, lang, router]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
