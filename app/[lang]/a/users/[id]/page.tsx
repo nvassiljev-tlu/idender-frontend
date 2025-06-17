@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Cookie from 'js-cookie';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -46,7 +46,7 @@ export default function UserDetailPage() {
   const pathname = usePathname();
   const userId = pathname.split('/').pop();
 
-  const fetchUser = async () => {
+  const fetchUser = useCallback(async () => {
     setLoading(true);
     setError('');
     try {
@@ -102,15 +102,14 @@ export default function UserDetailPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [router, userId]);
 
-  // Изменено: метод PUT -> PATCH, Content-Type остается application/json
   const updateName = async (field: 'first_name' | 'last_name', value: string) => {
     if (!user) return;
     try {
       const token = Cookie.get('sid');
       const res = await fetch(`http://37.27.182.28:3001/v1/users/${user.id}`, {
-        method: 'PATCH',  // изменено с PUT на PATCH
+        method: 'PATCH',
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -126,6 +125,7 @@ export default function UserDetailPage() {
 
       setUser(prev => prev ? { ...prev, [field]: value } : prev);
     } catch (e) {
+      console.error(e);
       setError(`Failed to update ${field === 'first_name' ? 'First Name' : 'Last Name'}.`);
     }
   };
@@ -152,7 +152,7 @@ export default function UserDetailPage() {
 
   useEffect(() => {
     fetchUser();
-  }, [userId]);
+  }, [fetchUser]);
 
   if (loading) {
     return (
@@ -198,7 +198,6 @@ export default function UserDetailPage() {
 
         {/* Body */}
         <div className="p-6 space-y-6">
-          {/* Buttons */}
           <div className="flex flex-col md:flex-row gap-4">
             <Button
               onClick={() => {
@@ -221,9 +220,8 @@ export default function UserDetailPage() {
             </Button>
           </div>
 
-          {/* User's Ideas */}
           <div>
-            <h2 className="text-xl font-semibold text-blue-900 mb-4">User's Ideas</h2>
+            <h2 className="text-xl font-semibold text-blue-900 mb-4">User&rsquo;s Ideas</h2>
             <div className="max-h-[400px] overflow-y-auto pr-2">
               {ideas.length === 0 ? (
                 <p className="text-sm text-slate-600">This user has not submitted any ideas yet.</p>
@@ -244,7 +242,7 @@ export default function UserDetailPage() {
           </div>
 
           <Button onClick={() => router.back()} className="mt-4">
-            back
+            Back
           </Button>
         </div>
       </div>

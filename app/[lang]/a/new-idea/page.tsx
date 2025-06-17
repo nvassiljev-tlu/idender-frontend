@@ -61,12 +61,13 @@ export default function IdeaPage() {
           router.push(`/et/login`);
         }
       } catch (err) {
+        console.log("Login check error:", err);
         router.push(`/et/login`);
-        console.log(err);
       }
     };
 
     checkLogin();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -92,6 +93,7 @@ export default function IdeaPage() {
       }
     };
     fetchCategories();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleTagChange = (value: string) => {
@@ -108,7 +110,10 @@ export default function IdeaPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const token = Cookie.get("sid");
-    if (!token) return alert(t("newIdea1.authRequired"));
+    if (!token) {
+      setShowAlert(true);
+      return alert(t("newIdea1.authRequired"));
+    }
 
     try {
       setIsLoading(true);
@@ -129,8 +134,15 @@ export default function IdeaPage() {
       });
 
       if (response.ok) {
+        setShowAlert(false); // Hide alert on success
         const data = await response.json();
-        const ideaId = data.payload?.id || Object.values(data.payload || {}).find((i: any) => i?.id)?.id;
+        const ideaId =
+          (data.payload?.id as number | undefined) ||
+          (
+            Object.values(data.payload || {}).find(
+              (i: unknown): i is { id: number } => typeof i === "object" && i !== null && "id" in i && typeof (i as { id: unknown }).id === "number"
+            )
+          )?.id;
 
         if (ideaId) {
           setCreateMessage(t("newIdea1.success"));
@@ -139,13 +151,17 @@ export default function IdeaPage() {
             router.push(`/${lang}/a/ideas/${ideaId}`);
           }, 2000);
         } else {
+          setShowAlert(true);
           alert(t("newIdea1.errorId"));
         }
       } else {
+        setShowAlert(true);
         const err = await response.json();
         alert(`${t("newIdea1.errorSubmit")}: ${err.errors?.error || "Unknown"}`);
       }
     } catch (error) {
+      setShowAlert(true);
+      console.log("Submit idea error:", error);
       alert(t("newIdea1.generalError"));
     } finally {
       setIsLoading(false);

@@ -19,7 +19,7 @@ function useClickOutside(ref: React.RefObject<HTMLElement | null>, callback: () 
   }, [ref, callback]);
 }
 
-const formatDate = (timestamp: string | number, lang: string = 'et') => {
+const formatDate = (timestamp: string | number) => {
   const date = new Date(Number(timestamp));
   return new Intl.DateTimeFormat('et-EE', {
     day: '2-digit',
@@ -28,36 +28,12 @@ const formatDate = (timestamp: string | number, lang: string = 'et') => {
   }).format(date);
 };
 
-const formatRelativeTime = (timestamp: string | number) => {
-  const seconds = Math.floor((Date.now() - Number(timestamp)) / 1000);
-  
-  const intervals = {
-    year: 31536000,
-    month: 2592000,
-    week: 604800,
-    day: 86400,
-    hour: 3600,
-    minute: 60
-  };
-
-  for (const [unit, secondsInUnit] of Object.entries(intervals)) {
-    const interval = Math.floor(seconds / secondsInUnit);
-    if (interval >= 1) {
-      return `${interval} ${unit}${interval === 1 ? '' : 's'} ago`;
-    }
-  }
-  
-  return 'Just now';
-};
-
 export default function IdenderDashboard() {
   const router = useRouter();
-  const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const profileMenuRef = useRef<HTMLDivElement | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [lang, setLang] = useState("");
-  const [isAdmin, setIsAdmin] = useState(false);
   const [news, setNews] = useState<Array<{
     id: number;
     title: string;
@@ -81,14 +57,16 @@ export default function IdenderDashboard() {
         const data = await res.json();
         setNews(data.payload);
       } else {
+        setError("Failed to fetch news");
         console.error('Failed to fetch news');
       }
     } catch (err) {
+      setError("Failed to fetch news");
       console.error('Error fetching news:', err);
     }
   };
 
-  useClickOutside(profileMenuRef, () => setShowProfileMenu(false));
+  useClickOutside(profileMenuRef, () => {});
 
   useEffect(() => {
     const token = Cookie.get('sid');
@@ -113,9 +91,6 @@ export default function IdenderDashboard() {
           router.push(`/login`);
           return;
         }
-
-        const data = await res.json();
-        setIsAdmin(data?.payload?.user.is_admin || false);
 
         const language = Cookie.get("lang") || 'et';
         setLang(language);
@@ -192,7 +167,7 @@ export default function IdenderDashboard() {
               {news.map(item => (
                 <div key={item.id} className="bg-white p-3 rounded-lg shadow-sm hover:shadow-md transition-shadow">
                   <h3 className="font-medium text-base text-slate-800">{item.title}</h3>
-                  <p className="text-xs text-slate-500 mt-1">{formatDate(item.created_at, lang)}</p>
+                  <p className="text-xs text-slate-500 mt-1">{formatDate(item.created_at)}</p>
                   {item.description && (
                     <p className="mt-2 text-xs text-slate-600">{item.description}</p>
                   )}
