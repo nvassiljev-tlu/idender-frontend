@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useRouter } from 'next/navigation';
-import { CheckCircle, XCircle, Loader2 } from 'lucide-react';
+import { XCircle, Loader2 } from 'lucide-react';
 import Cookie from 'js-cookie';
 import { useTranslation } from 'react-i18next';
 import i18n from '../../../../i18n/client';
@@ -27,7 +27,7 @@ export default function MyIdeasPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isFetchingIdeas, setIsFetchingIdeas] = useState(false);
 
-  const statusMap = {
+  const statusMap: { [key: number]: string } = {
     0: t("status1.created"),
     1: t("status1.voting"),
     2: t("status1.pending_admin"),
@@ -73,6 +73,7 @@ export default function MyIdeasPage() {
           setError(t('error.login'));
         }
       } catch (err) {
+        console.log('Login check error:', err);
         setError(t('error.server'));
       } finally {
         setIsLoading(false);
@@ -80,7 +81,8 @@ export default function MyIdeasPage() {
     };
 
     checkLogin();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [t]);
 
   useEffect(() => {
     if (!userId) return;
@@ -106,6 +108,7 @@ export default function MyIdeasPage() {
           setError(t('error.loadIdeas'));
         }
       } catch (err) {
+        console.log('Fetch ideas error:', err);
         setError(t('error.server'));
       } finally {
         setIsFetchingIdeas(false);
@@ -113,7 +116,8 @@ export default function MyIdeasPage() {
     };
 
     fetchIdeas();
-  }, [userId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId, t]);
 
   const handleIdeaClick = (ideaId: string) => {
     router.push(`/${lang}/a/ideas/${ideaId}`);
