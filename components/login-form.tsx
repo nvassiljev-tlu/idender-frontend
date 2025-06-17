@@ -16,9 +16,9 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { useTranslation } from "react-i18next";
-import i18n from '../app/i18n/client';
-import  { Loader2 } from "lucide-react";
+import { useTranslation } from "react-i18next"
+import i18n from "../app/i18n/client"
+import { Loader2 } from "lucide-react"
 
 const formSchema = z.object({
   email: z.string().email(),
@@ -31,18 +31,17 @@ export function LoginForm() {
   const router = useRouter()
   const params = useParams()
   const lang = typeof params.lang === "string" ? params.lang : "et"
-  const { t } = useTranslation('common');
+  const { t } = useTranslation("common")
 
   useEffect(() => {
-    // Change language and wait before rendering
     const changeLang = async () => {
       if (i18n.language !== lang) {
-        await i18n.changeLanguage(lang);
-        Cookie.set('lang', lang);
+        await i18n.changeLanguage(lang)
+        Cookie.set("lang", lang)
       }
-    };
-    changeLang();
-  }, [lang, router]);
+    }
+    changeLang()
+  }, [lang, router])
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -53,7 +52,7 @@ export function LoginForm() {
   })
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    setLoading(true); // Start loading
+    setLoading(true)
     try {
       const response = await fetch("http://37.27.182.28:3001/v1/oauth/login", {
         method: "POST",
@@ -72,10 +71,10 @@ export function LoginForm() {
       } else {
         setError(data.message || "Login failed")
       }
-    } catch (err) {
+    } catch {
       setError("An error occurred during login")
     } finally {
-      setLoading(false); // Stop loading
+      setLoading(false)
     }
   }
 
@@ -90,7 +89,7 @@ export function LoginForm() {
               <FormLabel>Email</FormLabel>
               <FormControl>
                 <Input
-                  placeholder={t('email')}
+                  placeholder={t("email")}
                   className="text-slate-900 h-auto w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-slate-700"
                   required
                   {...field}
@@ -109,7 +108,7 @@ export function LoginForm() {
               <FormControl>
                 <Input
                   type="password"
-                  placeholder={t('password')}
+                  placeholder={t("password")}
                   className="text-slate-900 h-auto w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-slate-700"
                   required
                   {...field}
@@ -128,7 +127,7 @@ export function LoginForm() {
           {loading ? (
             <Loader2 className="animate-spin h-5 w-5 mr-2" />
           ) : null}
-          {t('submit')}
+          {t("submit")}
         </button>
       </form>
       <div className="mt-4 text-center text-sm text-slate-600">
@@ -137,11 +136,11 @@ export function LoginForm() {
           onClick={() => router.push(`/${lang}/forgot-password`)}
           className="text-slate-700 hover:underline"
         >
-          {t('forgotPassword')}
+          {t("forgotPassword")}
         </button>
         <span className="mx-2">•</span>
         <Link href={`/${lang}/signup`} className="text-slate-700 hover:underline">
-          {t('signupBtn')}
+          {t("signupBtn")}
         </Link>
       </div>
     </Form>

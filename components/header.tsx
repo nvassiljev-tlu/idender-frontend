@@ -45,10 +45,7 @@ export default function Header() {
     const fetchAdminStatus = async () => {
       try {
         const token = Cookie.get('sid');
-        if (!token) {
-          setIsAdmin(false);
-          return;
-        }
+        if (!token) return;
 
         const response = await fetch('http://37.27.182.28:3001/v1/oauth/me', {
           headers: { Authorization: `Bearer ${token}` },
@@ -61,7 +58,8 @@ export default function Header() {
         } else {
           setIsAdmin(false);
         }
-      } catch (err) {
+      } catch (e) {
+        console.error('Failed to fetch admin status:', e);
         setIsAdmin(false);
       }
     };
@@ -72,7 +70,7 @@ export default function Header() {
   const handleLogout = async () => {
     try {
       const token = Cookie.get('sid');
-      const response = await fetch('http://37.27.182.28:3001/v1/oauth/logout', {
+      await fetch('http://37.27.182.28:3001/v1/oauth/logout', {
         method: 'POST',
         credentials: 'include',
         headers: {
@@ -80,15 +78,8 @@ export default function Header() {
           Authorization: `Bearer ${token}`,
         },
       });
-
-      if (response.ok) {
-        Cookie.remove('sid');
-        router.push(`/${lang}/login`);
-      } else {
-        console.error('Logout failed:', await response.text());
-      }
-    } catch (err) {
-      console.error('Logout error:', err);
+    } catch (e) {
+      console.error('Logout error:', e);
     } finally {
       Cookie.remove('sid');
       router.push(`/${lang}/login`);
@@ -142,47 +133,20 @@ export default function Header() {
         </button>
 
         {showProfileMenu && (
-          <div
-            className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50"
-            onMouseLeave={() => setShowProfileMenu(false)}
-          >
-            <button
-              onClick={() => {
-                setShowProfileMenu(false);
-                router.push(`/${lang}/a/profile`);
-              }}
-              className="block w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-100"
-            >
+          <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50" onMouseLeave={() => setShowProfileMenu(false)}>
+            <button onClick={() => router.push(`/${lang}/a/profile`)} className="block w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-100">
               {t('header.myProfile')}
             </button>
-            <button
-              onClick={() => {
-                setShowProfileMenu(false);
-                router.push(`/${lang}/a/ideas/my`);
-              }}
-              className="block w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-100"
-            >
+            <button onClick={() => router.push(`/${lang}/a/ideas/my`)} className="block w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-100">
               {t('header.myIdeas')}
             </button>
             {isAdmin && (
               <>
-                <div className="border-t border-gray-200 my-1"></div>
-                <button
-                  onClick={() => {
-                    setShowProfileMenu(false);
-                    router.push(`/${lang}/a/ideas/all`);
-                  }}
-                  className="block w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-100"
-                >
+                <div className="border-t border-gray-200 my-1" />
+                <button onClick={() => router.push(`/${lang}/a/ideas/all`)} className="block w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-100">
                   {t('header.allIdeas')}
                 </button>
-                <button
-                  onClick={() => {
-                    setShowProfileMenu(false);
-                    router.push(`/${lang}/a/users`);
-                  }}
-                  className="block w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-100"
-                >
+                <button onClick={() => router.push(`/${lang}/a/users`)} className="block w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-100">
                   {t('header.allUsers')}
                 </button>
               </>
