@@ -5,6 +5,8 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useRouter } from 'next/navigation';
 import { CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import Cookie from 'js-cookie';
+import { useTranslation } from 'react-i18next';
+import i18n from '../../../../i18n/client';
 
 type Idea = {
   id: string;
@@ -15,30 +17,40 @@ type Idea = {
   createdAt?: string;
 };
 
-const statusMap = {
-  0: "Created / Pending Moderation",
-  1: "On Voting",
-  2: "Pending School Administration Decision",
-  3: "Approved",
-  4: "Declined (by School)",
-  5: "Declined (Moderation)",
-};
-
 export default function MyIdeasPage() {
   const router = useRouter();
-  const [lang, setLang] = useState("");
+  const { t } = useTranslation('common');
+  const [lang, setLang] = useState('');
   const [ideas, setIdeas] = useState<Idea[]>([]);
   const [error, setError] = useState('');
   const [userId, setUserId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isFetchingIdeas, setIsFetchingIdeas] = useState(false);
 
+  const statusMap = {
+    0: t("status1.created"),
+    1: t("status1.voting"),
+    2: t("status1.pending_admin"),
+    3: t("status1.approved"),
+    4: t("status1.declined_school"),
+    5: t("status1.declined_moderation"),
+  };
+
   useEffect(() => {
+    const language = Cookie.get("lang") || "et";
+    setLang(language);
+    const changeLang = async () => {
+      if (i18n.language !== language) {
+        await i18n.changeLanguage(language);
+      }
+    };
+    changeLang();
+
     const checkLogin = async () => {
       try {
         const token = Cookie.get('sid');
         if (!token) {
-          setError('You are not logged in.');
+          setError(t('error.login'));
           setIsLoading(false);
           return;
         }
@@ -56,14 +68,12 @@ export default function MyIdeasPage() {
 
         if (res.status === 200 && data.payload?.user?.id) {
           setUserId(data.payload.user.id);
-          const language = Cookie.get("lang") || "et";
-          setLang(language);
         } else {
           Cookie.remove('sid');
-          setError('You are not logged in.');
+          setError(t('error.login'));
         }
       } catch (err) {
-        setError('Could not connect to server.');
+        setError(t('error.server'));
       } finally {
         setIsLoading(false);
       }
@@ -93,10 +103,10 @@ export default function MyIdeasPage() {
         if (res.status === 200 && data.status === 'OPERATION-OK') {
           setIdeas(data.payload);
         } else {
-          setError('Failed to load ideas.');
+          setError(t('error.loadIdeas'));
         }
       } catch (err) {
-        setError('Server connection failed.');
+        setError(t('error.server'));
       } finally {
         setIsFetchingIdeas(false);
       }
@@ -104,7 +114,7 @@ export default function MyIdeasPage() {
 
     fetchIdeas();
   }, [userId]);
-  
+
   const handleIdeaClick = (ideaId: string) => {
     router.push(`/${lang}/a/ideas/${ideaId}`);
   };
@@ -119,14 +129,14 @@ export default function MyIdeasPage() {
 
   return (
     <div className="flex flex-col items-center justify-start min-h-screen bg-slate-500 text-white font-sans px-4 py-8">
-      <h1 className="text-2xl font-bold mb-6">My Ideas</h1>
+      <h1 className="text-2xl font-bold mb-6">{t("myIdeas.title")}</h1>
 
       <div className="w-full max-w-2xl bg-slate-600 p-6 rounded-lg shadow space-y-4">
         {error && (
           <Alert className="border-red-500 bg-red-100 text-red-700">
             <XCircle className="h-5 w-5 text-red-600" />
             <div>
-              <AlertTitle>Error</AlertTitle>
+              <AlertTitle>{t("error.title")}</AlertTitle>
               <AlertDescription>{error}</AlertDescription>
             </div>
           </Alert>
@@ -135,12 +145,12 @@ export default function MyIdeasPage() {
         {isFetchingIdeas && !error && (
           <div className="flex items-center justify-center">
             <Loader2 className="h-8 w-8 animate-spin text-white" />
-            <p className="text-sm text-white ml-2">Loading your ideas...</p>
+            <p className="text-sm text-white ml-2">{t("loading.ideas")}</p>
           </div>
         )}
 
         {!isFetchingIdeas && ideas.length === 0 && !error && (
-          <p className="text-center text-sm text-white">No ideas submitted yet.</p>
+          <p className="text-center text-sm text-white">{t("noIdeas")}</p>
         )}
 
         {!isLoading && ideas.map((idea) => (
@@ -151,7 +161,7 @@ export default function MyIdeasPage() {
             <h2 className="text-lg font-semibold">{idea.title}</h2>
             <p className="text-sm text-slate-300 mb-2">{idea.description}</p>
             <p className="text-sm font-semibold">
-              Status: {statusMap[idea.status] || 'Unknown'}
+              {t("status.label")}: {statusMap[idea.status] || 'Unknown'}
             </p>
           </div>
         ))}

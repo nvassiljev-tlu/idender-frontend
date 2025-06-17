@@ -40,7 +40,59 @@
   "backToHome": "Tagasi avalehele",
   "alreadyAccount": "Kas sul on juba konto?",
   "loginHere": "Logi sisse siit",
-  "forgotPassword": "Unustasid parooli?"
-}
+  "forgotPassword": "Unustasid parooli?",
+  "status": {
+    "created": "Loodud / Modereerimisel",
+    "voting": "Hääletamisel",
+    "pending_admin": "Ootab kooli otsust",
+    "approved": "Heaks kiidetud",
+    "declined_school": "Tagasi lükatud (kool)",
+    "declined_moderation": "Tagasi lükatud (moderaator)"
+  },
+  "status.label": "Staatus",
+  "submittedBy": "Esitanud",
+  "comments": "Kommentaarid",
+  "noComments": "Kommentaare veel pole.",
+  "addComment": "Lisa kommentaar...",
+  "add": "Lisa",
+  "changeStatus": "Muuda staatust",
+  "selectStatus": "Vali staatus",
+  "updateStatus": "Uuenda staatust",
+  "deletedAt": "Kustutatud",
+  "deleted": "KUSTUTATUD",
+  "by": "autor",
+  "error.title": "Viga",
+  "error.loading": "Laadimisel ilmnes viga",
+  "loading.title": "Laadimine...",
+  "loading.description": "Kirjeldus laadimisel...",
+   "status1": {
+    "created": "Loodud / Ootel modereerimist",
+    "voting": "Hääletusel",
+    "pending_admin": "Ootel kooli otsust",
+    "approved": "Heaks kiidetud",
+    "declined_school": "Tagasi lükatud (kooli poolt)",
+    "declined_moderation": "Tagasi lükatud (modereerimine)"
+  },
+  "myIdeas.title": "Minu ideed",
+  "error.loadIdeas": "Ideede laadimine ebaõnnestus.",
+  "noIdeas": "Ühtegi ideed pole veel esitatud.",
+  "loading.ideas": "Laadin sinu ideid...",
+  "status3": {
+    "created": "Loodud / Modereerimist ootab",
+    "voting": "Hääletamisel",
+    "pending_admin": "Kooli juhtkonna otsust ootab",
+    "approved": "Heaks kiidetud",
+    "declined_school": "Tagasi lükatud (kooli poolt)",
+    "declined_moderation": "Tagasi lükatud (moderaator)"
+  },
+  "allIdeas": {
+    "title": "Kõik ideed"
+  },
+  "filterByStatus": "Filtreeri staatuse järgi",
+  "noIdeas1": "Selle staatusega ideid pole.",
+  "approve": "Kinnita",
+  "decline": "Lükka tagasi"
+
+ }
 
 

@@ -40,6 +40,57 @@
   "backToHome": "Back to Home",
   "alreadyAccount": "Already have an account?",
   "loginHere": "Log in here",
-  "forgotPassword": "Forgot password?"
+  "forgotPassword": "Forgot password?",
+  "status": {
+    "created": "Created / Pending Moderation",
+    "voting": "On Voting",
+    "pending_admin": "Pending School Administration Decision",
+    "approved": "Approved",
+    "declined_school": "Declined (by School)",
+    "declined_moderation": "Declined (Moderation)"
+  },
+  "status.label": "Status",
+  "submittedBy": "Submitted by",
+  "comments": "Comments",
+  "noComments": "No comments yet.",
+  "addComment": "Add a comment...",
+  "add": "Add",
+  "changeStatus": "Change Status",
+  "selectStatus": "Select status",
+  "updateStatus": "Update Status",
+  "deletedAt": "Deleted at",
+  "deleted": "DELETED",
+  "by": "by",
+  "error.title": "Error",
+  "error.loading": "An error occurred while loading",
+  "loading.title": "Loading...",
+  "loading.description": "Loading description...",
+  "status1": {
+    "created": "Created / Pending Moderation",
+    "voting": "On Voting",
+    "pending_admin": "Pending School Administration Decision",
+    "approved": "Approved",
+    "declined_school": "Declined (by School)",
+    "declined_moderation": "Declined (Moderation)"
+  },
+  "myIdeas.title": "My Ideas",
+  "error.loadIdeas": "Failed to load ideas.",
+  "noIdeas": "No ideas submitted yet.",
+  "loading.ideas": "Loading your ideas...",
+  "status3": {
+    "created": "Created / Pending Moderation",
+    "voting": "On Voting",
+    "pending_admin": "Pending School Administration Decision",
+    "approved": "Approved",
+    "declined_school": "Declined (by School)",
+    "declined_moderation": "Declined (Moderation)"
+  },
+  "allIdeas": {
+    "title": "All Ideas"
+  },
+  "filterByStatus": "Filter by status",
+  "noIdeas1": "No ideas with this status.",
+  "approve": "Approve",
+  "decline": "Decline"
 
 }
