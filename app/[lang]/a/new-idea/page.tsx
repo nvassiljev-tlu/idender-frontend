@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
@@ -16,16 +16,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader2 } from "lucide-react"; 
+import { Loader2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import i18n from "../../../i18n/client";
 
 export default function IdeaPage() {
+  const { t } = useTranslation("common");
   const [title, setTitle] = useState("");
   const [tags, setTags] = useState<number[]>([]);
   const [description, setDescription] = useState("");
   const [isAnonymous, setIsAnonymous] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
   const [categories, setCategories] = useState<{ id: number; name: string }[]>([]);
-  const [isLoading, setIsLoading] = useState(true); 
+  const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
   const [lang, setLang] = useState("");
   const [createMessage, setCreateMessage] = useState("");
@@ -33,31 +36,34 @@ export default function IdeaPage() {
   useEffect(() => {
     const checkLogin = async () => {
       try {
-        const token = Cookie.get('sid');
+        const token = Cookie.get("sid");
         if (!token) {
-          router.push('/et/login');
+          router.push("/et/login");
         }
 
-        const res = await fetch('http://37.27.182.28:3001/v1/oauth/me', {
-          method: 'GET',
-          credentials: 'include',
+        const res = await fetch("http://37.27.182.28:3001/v1/oauth/me", {
+          method: "GET",
+          credentials: "include",
           headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
         });
 
         if (res.status === 200) {
-          const language = Cookie.get('lang') || 'et';
+          const language = Cookie.get("lang") || "et";
           setLang(language);
+          if (i18n.language !== language) {
+            await i18n.changeLanguage(language);
+          }
         } else {
-          Cookie.remove('sid');
+          Cookie.remove("sid");
           router.push(`/et/login`);
         }
       } catch (err) {
         router.push(`/et/login`);
         console.log(err);
-      } 
+      }
     };
 
     checkLogin();
@@ -67,10 +73,7 @@ export default function IdeaPage() {
     const fetchCategories = async () => {
       try {
         const token = Cookie.get("sid");
-        if (!token) {
-          console.error("No token available");
-          return;
-        }
+        if (!token) return;
 
         const response = await fetch("http://37.27.182.28:3001/v1/ideas/categories", {
           method: "GET",
@@ -81,8 +84,6 @@ export default function IdeaPage() {
         if (response.ok) {
           const data = await response.json();
           setCategories(data.payload);
-        } else {
-          console.error("Failed to fetch categories:", response.status);
         }
       } catch (error) {
         console.error("Error fetching categories:", error);
@@ -107,31 +108,11 @@ export default function IdeaPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const token = Cookie.get("sid");
-
-    if (!token) {
-      alert("You must be logged in to submit an idea.");
-      return;
-    }
-
-    const response = await fetch("http://37.27.182.28:3001/v1/oauth/me", {
-      method: "GET",
-      headers: { Authorization: `Bearer ${token}` },
-      credentials: "include",
-    });
-    if (!response.ok) {
-      alert("You are not authorized.");
-      return;
-    }
-
-    const ideaData = {
-      title,
-      categories: tags,
-      description,
-      is_anonymus: isAnonymous ? 1 : 0,
-    };
+    if (!token) return alert(t("newIdea1.authRequired"));
 
     try {
       setIsLoading(true);
+
       const response = await fetch("http://37.27.182.28:3001/v1/ideas", {
         method: "POST",
         headers: {
@@ -139,36 +120,33 @@ export default function IdeaPage() {
           Authorization: `Bearer ${token}`,
         },
         credentials: "include",
-        body: JSON.stringify(ideaData),
+        body: JSON.stringify({
+          title,
+          categories: tags,
+          description,
+          is_anonymus: isAnonymous ? 1 : 0,
+        }),
       });
 
-      if (response.status === 201 || response.ok) { // Handle 201 Created
+      if (response.ok) {
         const data = await response.json();
-        console.log("Full API Response:", JSON.stringify(data, null, 2));
-        let ideaId = data.payload?.id;
-        if (!ideaId) {
-          console.error("ID not found in payload.id, checking alternatives:", data);
-          ideaId = Object.values(data.payload || {}).find((item: any) => item?.id)?.id;
-        }
+        const ideaId = data.payload?.id || Object.values(data.payload || {}).find((i: any) => i?.id)?.id;
 
         if (ideaId) {
-          setCreateMessage("Idea created. Sent to moderation!");
+          setCreateMessage(t("newIdea1.success"));
           setTimeout(() => {
             setCreateMessage("");
             router.push(`/${lang}/a/ideas/${ideaId}`);
           }, 2000);
         } else {
-          console.error("No valid ID found in API response:", data);
-          alert("Failed to get idea ID from API response. Check console for details.");
+          alert(t("newIdea1.errorId"));
         }
       } else {
-        const errorData = await response.json();
-        console.error("Failed to submit idea:", errorData);
-        alert(`Failed to submit idea: ${errorData.errors?.error || "Unknown error"}`);
+        const err = await response.json();
+        alert(`${t("newIdea1.errorSubmit")}: ${err.errors?.error || "Unknown"}`);
       }
     } catch (error) {
-      console.error("Error:", error);
-      alert("An error occurred.");
+      alert(t("newIdea1.generalError"));
     } finally {
       setIsLoading(false);
     }
@@ -185,30 +163,27 @@ export default function IdeaPage() {
   return (
     <div className="min-h-screen bg-slate-500 flex flex-col items-center justify-center p-4">
       <div className="w-full max-w-md bg-white p-6 rounded-lg shadow-md">
-        <h1 className="text-2xl font-bold text-slate-700 mb-4">New Idea</h1>
+        <h1 className="text-2xl font-bold text-slate-700 mb-4">{t("newIdea1.title")}</h1>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-light text-slate-700">Title</label>
+            <label className="block text-sm font-light text-slate-700">{t("newIdea1.form.title")}</label>
             <input
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full p-2 border border-slate-300 rounded"
-              style={{ color: "#000000" }}
-              placeholder="Add more paid snacks options"
+              className="w-full p-2 border border-slate-300 rounded text-black"
+              placeholder={t("newIdea1.form.placeholderTitle")}
             />
           </div>
           <div>
-            <label className="block text-sm font-light text-slate-700">Tags</label>
+            <label className="block text-sm font-light text-slate-700">{t("newIdea1.form.tags")}</label>
             <Select onValueChange={handleTagChange} value="">
               <SelectTrigger className="w-full p-2 border border-slate-300 rounded text-black">
-                <SelectValue placeholder="Select categories" />
+                <SelectValue placeholder={t("newIdea1.form.select")} />
               </SelectTrigger>
               <SelectContent>
                 {categories.map((category) => (
-                  <SelectItem key={category.id} value={category.name}>
-                    {category.name}
-                  </SelectItem>
+                  <SelectItem key={category.id} value={category.name}>{category.name}</SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -225,13 +200,12 @@ export default function IdeaPage() {
             </div>
           </div>
           <div>
-            <label className="block text-sm font-light text-slate-700">Description</label>
+            <label className="block text-sm font-light text-slate-700">{t("newIdea1.form.description")}</label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full p-2 border border-slate-300 rounded h-24"
-              style={{ color: "#000000" }}
-              placeholder="Please add some snacks like Lay's or Pringles"
+              className="w-full p-2 border border-slate-300 rounded h-24 text-black"
+              placeholder={t("newIdea1.form.placeholderDescription")}
             />
           </div>
           <div className="flex items-center">
@@ -241,22 +215,16 @@ export default function IdeaPage() {
               onChange={(e) => setIsAnonymous(e.target.checked)}
               className="mr-2"
             />
-            <label className="text-sm font-light text-slate-700">Anonymous</label>
+            <label className="text-sm font-light text-slate-700">{t("newIdea1.form.anonymous")}</label>
           </div>
-          <Button 
-            type="submit" 
-            className="w-full bg-slate-800 text-white hover:bg-slate-700 rounded-none"
-            onMouseDown={(e) => e.currentTarget.style.transform = 'scale(0.95)'}
-            onMouseUp={(e) => e.currentTarget.style.transform = 'scale(1)'}
-            onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-          >
-            Create
+          <Button type="submit" className="w-full bg-slate-800 text-white hover:bg-slate-700 rounded-none">
+            {t("newIdea1.form.create")}
           </Button>
         </form>
         {showAlert && (
           <Alert className="mt-4">
-            <AlertTitle>Success</AlertTitle>
-            <AlertDescription>Post created and sent for moderation!</AlertDescription>
+            <AlertTitle>{t("newIdea1.alert.title")}</AlertTitle>
+            <AlertDescription>{t("newIdea1.alert.description")}</AlertDescription>
           </Alert>
         )}
         {createMessage && (
