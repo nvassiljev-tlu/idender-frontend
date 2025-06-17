@@ -40,5 +40,56 @@
   "backToHome": "Retour à l'accueil",
   "alreadyAccount": "Vous avez déjà un compte ?",
   "loginHere": "Connectez-vous ici",
-  "forgotPassword": "Mot de passe oublié ?"
+  "forgotPassword": "Mot de passe oublié ?",
+   "status": {
+    "created": "Créé / En attente de modération",
+    "voting": "En vote",
+    "pending_admin": "En attente de décision de l'administration",
+    "approved": "Approuvé",
+    "declined_school": "Refusé (par l'école)",
+    "declined_moderation": "Refusé (modération)"
+  },
+  "status.label": "Statut",
+  "submittedBy": "Soumis par",
+  "comments": "Commentaires",
+  "noComments": "Aucun commentaire pour le moment.",
+  "addComment": "Ajouter un commentaire...",
+  "add": "Ajouter",
+  "changeStatus": "Changer le statut",
+  "selectStatus": "Sélectionner un statut",
+  "updateStatus": "Mettre à jour le statut",
+  "deletedAt": "Supprimé le",
+  "deleted": "SUPPRIMÉ",
+  "by": "par",
+  "error.title": "Erreur",
+  "error.loading": "Une erreur s'est produite lors du chargement",
+  "loading.title": "Chargement...",
+  "loading.description": "Description en cours de chargement...",
+  "status1": {
+    "created": "Créé / En attente de modération",
+    "voting": "En cours de vote",
+    "pending_admin": "En attente de décision de l'administration scolaire",
+    "approved": "Approuvé",
+    "declined_school": "Refusé (par l'école)",
+    "declined_moderation": "Refusé (modération)"
+  },
+  "myIdeas.title": "Mes idées",
+  "error.loadIdeas": "Échec du chargement des idées.",
+  "noIdeas": "Aucune idée soumise pour le moment.",
+  "loading.ideas": "Chargement de vos idées...",
+   "status3": {
+    "created": "Créé / En attente de modération",
+    "voting": "En vote",
+    "pending_admin": "En attente de décision de l'administration",
+    "approved": "Approuvé",
+    "declined_school": "Rejeté (par l'école)",
+    "declined_moderation": "Rejeté (modération)"
+  },
+  "allIdeas": {
+    "title": "Toutes les idées"
+  },
+  "filterByStatus": "Filtrer par statut",
+  "noIdeas1": "Aucune idée avec ce statut.",
+  "approve": "Approuver",
+  "decline": "Rejeter"
 }
