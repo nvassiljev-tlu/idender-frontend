@@ -41,7 +41,7 @@ export default function IdeaPage() {
           router.push("/et/login");
         }
 
-        const res = await fetch("http://37.27.182.28:3001/v1/oauth/me", {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/oauth/me`, {
           method: "GET",
           credentials: "include",
           headers: {
@@ -76,7 +76,7 @@ export default function IdeaPage() {
         const token = Cookie.get("sid");
         if (!token) return;
 
-        const response = await fetch("http://37.27.182.28:3001/v1/ideas/categories", {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/ideas/categories`, {
           method: "GET",
           headers: { Authorization: `Bearer ${token}` },
           credentials: "include",
@@ -117,7 +117,7 @@ export default function IdeaPage() {
     try {
       setIsLoading(true);
 
-      const response = await fetch("http://37.27.182.28:3001/v1/ideas", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/ideas`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
