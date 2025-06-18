@@ -44,7 +44,7 @@ export default function IdenderDashboard() {
   const fetchNews = async () => {
     try {
       const token = Cookie.get('sid');
-      const res = await fetch('http://37.27.182.28:3001/v1/news/recent', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/news/recent`, {
         method: 'GET',
         credentials: 'include',
         headers: {
@@ -77,7 +77,7 @@ export default function IdenderDashboard() {
 
     const checkLogin = async () => {
       try {
-        const res = await fetch('http://37.27.182.28:3001/v1/oauth/me', {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/oauth/me`, {
           method: 'GET',
           credentials: 'include',
           headers: {
