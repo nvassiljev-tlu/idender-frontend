@@ -58,11 +58,11 @@ export default function AllUsersAdminPage() {
       if (!token) return router.push('/login');
 
       const [usersRes, currentUserRes] = await Promise.all([
-        fetch('http://37.27.182.28:3001/v1/users', {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/users`, {
           headers: { Authorization: `Bearer ${token}` },
           credentials: 'include',
         }),
-        fetch('http://37.27.182.28:3001/v1/oauth/me', {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/oauth/me`, {
           headers: { Authorization: `Bearer ${token}` },
           credentials: 'include',
         }),
@@ -119,7 +119,7 @@ export default function AllUsersAdminPage() {
     try {
       const token = Cookie.get('sid');
       const endpoint = activate ? 'activate' : 'deactivate';
-      const res = await fetch(`http://37.27.182.28:3001/v1/users/${id}/${endpoint}`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/users/${id}/${endpoint}`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -159,7 +159,7 @@ export default function AllUsersAdminPage() {
       else if (role === 'admin') scopeIds = [1, 3];
       else if (role === 'superadmin') scopeIds = [1, 3, 15];
 
-      const res = await fetch(`http://37.27.182.28:3001/v1/users/${id}/scopes`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/users/${id}/scopes`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
