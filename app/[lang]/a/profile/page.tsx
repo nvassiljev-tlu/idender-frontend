@@ -22,7 +22,7 @@ export default function ProfilePage() {
   const { t } = useTranslation('common');
 
   const [user, setUser] = useState({ id: '', firstName: '', lastName: '', email: '' });
-  const [selectedLang, setSelectedLang] = useState('en');
+  const [selectedLang, setSelectedLang] = useState(() => Cookies.get('lang') || 'en');
   const [showAlert, setShowAlert] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [lang, setLang] = useState('');
@@ -108,55 +108,59 @@ export default function ProfilePage() {
     );
   }
 
-  return (
-    <div className="min-h-screen bg-slate-200 text-slate-800 flex flex-col min-w-[320px]">
-      <main className="w-full max-w-6xl mx-auto p-4 flex-1 overflow-y-auto pt-16 min-w-[320px]">
-        <section className="mb-20 w-full max-w-5xl min-w-[320px] sm:min-w-[600px] mx-auto">
-          <h1 className="text-2xl font-bold mb-6 text-center">{t('myProfile')}</h1>
+return (
+  <div className="min-h-screen bg-slate-200 text-slate-800 flex flex-col min-w-[320px]">
+    <main className="w-full max-w-6xl mx-auto p-4 flex-1 overflow-y-auto min-w-[320px]">
+      <section className="mb-20 w-full max-w-5xl min-w-[320px] sm:min-w-[600px] mx-auto">
+        <div className="flex justify-center mb-4">
+          <h2 className="text-xl font-bold text-slate-800 text-center">{t('myProfile')}</h2>
+       </div>
 
-          <div className="bg-white text-slate-800 p-6 rounded-lg shadow w-full space-y-4">
-            {showAlert && (
-              <Alert className="mb-4 border-green-500 bg-green-100 text-green-700">
-                <CheckCircle className="h-5 w-5 text-green-600" />
-                <div>
-                  <AlertTitle>{t('success')}</AlertTitle>
-                  <AlertDescription>{t('updateSuccess')}</AlertDescription>
-                </div>
-              </Alert>
-            )}
 
-            <TextField label={t('fullName')} value={`${user.firstName} ${user.lastName}`} />
-            <TextField label={t('email')} value={user.email} />
-
+        {showAlert && (
+          <Alert className="mb-4 border-green-500 bg-green-100 text-green-700">
+            <CheckCircle className="h-5 w-5 text-green-600" />
             <div>
-              <label className="block text-sm mb-1">{t('preferredLanguage')}</label>
-              <select
-                className="w-full p-2 border border-slate-400 bg-white text-slate-800 rounded text-sm"
-                value={selectedLang}
-                onChange={(e) => setSelectedLang(e.target.value)}
-              >
-                {languages.map((l) => (
-                  <option key={l.code} value={l.code}>
-                    {l.label}
-                  </option>
-                ))}
-              </select>
+              <AlertTitle>{t('success')}</AlertTitle>
+              <AlertDescription>{t('updateSuccess')}</AlertDescription>
             </div>
+          </Alert>
+        )}
 
-            <Button onClick={handleUpdate} className="w-full bg-slate-800 text-white hover:bg-slate-700 rounded-none">
-              {t('updateBtn')}
-            </Button>
+        <div className="bg-white text-slate-800 p-6 rounded-lg shadow w-full space-y-4">
+          <TextField label={t('fullName')} value={`${user.firstName} ${user.lastName}`} />
+          <TextField label={t('email')} value={user.email} />
 
-            <Button onClick={() => router.push(`/${lang}/a/home`)} className="w-full bg-slate-600 text-white hover:bg-slate-700 rounded-none">
-              {t('backToHome')}
-            </Button>
+          <div>
+            <label className="block text-sm mb-1">{t('preferredLanguage')}</label>
+            <select
+              className="w-full p-2 border border-slate-400 bg-white text-slate-800 rounded text-sm"
+              value={selectedLang}
+              onChange={(e) => setSelectedLang(e.target.value)}
+            >
+              {languages.map((l) => (
+                <option key={l.code} value={l.code}>
+                  {l.label}
+                </option>
+              ))}
+            </select>
           </div>
-        </section>
-      </main>
 
-      <div className="h-20 sm:hidden"></div>
-    </div>
-  );
+          <Button onClick={handleUpdate} className="w-full bg-slate-800 text-white hover:bg-slate-700 rounded-none">
+            {t('updateBtn')}
+          </Button>
+
+          <Button onClick={() => router.push(`/${lang}/a/home`)} className="w-full bg-slate-600 text-white hover:bg-slate-700 rounded-none">
+            {t('backToHome')}
+          </Button>
+        </div>
+      </section>
+    </main>
+
+    <div className="h-20 sm:hidden"></div>
+  </div>
+);
+
 }
 
 function TextField({ label, value }: { label: string; value: string }) {
