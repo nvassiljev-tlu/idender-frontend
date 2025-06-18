@@ -4,6 +4,8 @@ import { useRouter } from 'next/navigation';
 import Cookie from 'js-cookie';
 import { useEffect, useRef, useState } from 'react';
 import { Loader2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import i18n from '../../../i18n/client';
 
 function useClickOutside(ref: React.RefObject<HTMLElement | null>, callback: () => void) {
   useEffect(() => {
@@ -12,9 +14,9 @@ function useClickOutside(ref: React.RefObject<HTMLElement | null>, callback: () 
         callback();
       }
     }
-    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [ref, callback]);
 }
@@ -30,43 +32,25 @@ const formatDate = (timestamp: string | number) => {
 
 export default function IdenderDashboard() {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(true);
+  const { t } = useTranslation('common');
   const profileMenuRef = useRef<HTMLDivElement | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [lang, setLang] = useState("");
-  const [news, setNews] = useState<Array<{
-    id: number;
-    title: string;
-    description: string;
-    created_at: string;
-  }>>([]);
-
-  const fetchNews = async () => {
-    try {
-      const token = Cookie.get('sid');
-      const res = await fetch('https://api-staging.idender.services.nvassiljev.com/v1/news/recent', {
-        method: 'GET',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        setNews(data.payload);
-      } else {
-        setError("Failed to fetch news");
-        console.error('Failed to fetch news');
-      }
-    } catch (err) {
-      setError("Failed to fetch news");
-      console.error('Error fetching news:', err);
-    }
-  };
+  const [lang, setLang] = useState('');
+  const [news, setNews] = useState<Array<{ id: number; title: string; description: string; created_at: string }>>([]);
 
   useClickOutside(profileMenuRef, () => {});
+
+  useEffect(() => {
+    const language = Cookie.get('lang') || 'et';
+    const changeLang = async () => {
+      if (i18n.language !== language) {
+        await i18n.changeLanguage(language);
+      }
+    };
+    changeLang();
+    setLang(language);
+  }, []);
 
   useEffect(() => {
     const token = Cookie.get('sid');
@@ -82,23 +66,21 @@ export default function IdenderDashboard() {
           credentials: 'include',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          }
+            Authorization: `Bearer ${token}`,
+          },
         });
 
         if (res.status !== 200) {
-          Cookie.remove("sid");
-          router.push(`/login`);
+          Cookie.remove('sid');
+          router.push('/login');
           return;
         }
 
-        const language = Cookie.get("lang") || 'et';
-        setLang(language);
         await fetchNews();
       } catch (err) {
-        console.log(err);
-        Cookie.remove("sid");
-        router.push(`/login`);
+        console.error(err);
+        Cookie.remove('sid');
+        router.push('/login');
       } finally {
         setIsLoading(false);
       }
@@ -107,32 +89,32 @@ export default function IdenderDashboard() {
     checkLogin();
   }, [router]);
 
+  const fetchNews = async () => {
+    try {
+      const token = Cookie.get('sid');
+      const res = await fetch('https://api-staging.idender.services.nvassiljev.com/v1/news/recent', {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setNews(data.payload);
+      } else {
+        setError(t('fetchError'));
+      }
+    } catch (err) {
+      setError(t('fetchError'));
+    }
+  };
+
   const handleCreateIdea = () => {
     router.push(`/${lang}/a/new-idea`);
   };
-
-  const VoteIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M9 12l2 2 4-4" />
-      <path d="M5 7c0-1.1.9-2 2-2h10a2 2 0 0 1 2 2v12H5V7z" />
-    </svg>
-  );
-
-  const NewspaperIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2" />
-      <path d="M18 14h-8" />
-      <path d="M15 18h-5" />
-      <path d="M10 6h8v4h-8V6Z" />
-    </svg>
-  );
-
-  const PlusIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <line x1="12" y1="5" x2="12" y2="19"></line>
-      <line x1="5" y1="12" x2="19" y2="12"></line>
-    </svg>
-  );
 
   if (isLoading) {
     return (
@@ -147,8 +129,7 @@ export default function IdenderDashboard() {
       <main className="w-full max-w-6xl mx-auto p-4 flex-1 overflow-y-auto min-w-[320px]">
         <section className="mb-20 w-full max-w-5xl min-w-[320px] sm:min-w-[600px] mx-auto">
           <div className="flex items-center gap-2 mb-4">
-            <NewspaperIcon />
-            <h2 className="text-xl font-bold text-slate-800">News</h2>
+            <h2 className="text-xl font-bold text-slate-800">{t('newsTitle')}</h2>
           </div>
 
           {error && (
@@ -158,8 +139,8 @@ export default function IdenderDashboard() {
           {news.length === 0 ? (
             <div className="grid grid-cols-1 gap-4 w-full min-w-[320px]">
               <div className="bg-white p-6 rounded-lg shadow-sm text-center min-h-[150px] flex flex-col justify-center items-center">
-                <p className="text-slate-500 mb-2">No news to display.</p>
-                <button onClick={fetchNews} className="text-blue-600 hover:text-blue-800 text-sm">Refresh</button>
+                <p className="text-slate-500 mb-2">{t('noNews')}</p>
+                <button onClick={fetchNews} className="text-blue-600 hover:text-blue-800 text-sm">{t('refresh')}</button>
               </div>
             </div>
           ) : (
@@ -168,9 +149,7 @@ export default function IdenderDashboard() {
                 <div key={item.id} className="bg-white p-3 rounded-lg shadow-sm hover:shadow-md transition-shadow">
                   <h3 className="font-medium text-base text-slate-800">{item.title}</h3>
                   <p className="text-xs text-slate-500 mt-1">{formatDate(item.created_at)}</p>
-                  {item.description && (
-                    <p className="mt-2 text-xs text-slate-600">{item.description}</p>
-                  )}
+                  {item.description && <p className="mt-2 text-xs text-slate-600">{item.description}</p>}
                 </div>
               ))}
             </div>
@@ -181,12 +160,10 @@ export default function IdenderDashboard() {
       <div className="fixed bottom-6 left-0 right-0 flex justify-center z-20 px-4">
         <div className="flex gap-4 md:gap-8 w-full max-w-md">
           <button onClick={handleCreateIdea} className="flex-1 flex items-center justify-center gap-2 bg-slate-800 text-white px-4 py-3 rounded-full shadow-lg hover:bg-slate-700 transition-colors">
-            <PlusIcon />
-            <span>Create idea</span>
+            <span>{t('createIdea')}</span>
           </button>
           <button onClick={() => router.push(`/${lang}/a/voting`)} className="flex-1 flex items-center justify-center gap-2 bg-slate-700 text-white px-4 py-3 rounded-full shadow-lg hover:bg-slate-600 transition-colors">
-            <VoteIcon />
-            <span>Voting</span>
+            <span>{t('voting')}</span>
           </button>
         </div>
       </div>

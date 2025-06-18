@@ -126,5 +126,11 @@
   "resetPassword": "Reset Password",
   "newPassword": "New Password",
   "confirmPassword": "Confirm Password",
-  "resetPasswordButton": "Change Password"
+  "resetPasswordButton": "Change Password",
+  "newsTitle": "News",
+  "fetchError": "Failed to fetch news",
+  "noNews": "No news to display.",
+  "refresh": "Refresh",
+  "createIdea": "Create idea",
+  "voting": "Voting"
 }
