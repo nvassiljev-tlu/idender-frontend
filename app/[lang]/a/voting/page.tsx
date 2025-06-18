@@ -21,6 +21,7 @@ export default function VotingPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isFetchingIdea, setIsFetchingIdea] = useState(false);
   const [lang, setLang] = useState('');
+  const [isCardVisible, setIsCardVisible] = useState(true);
 
   const cardRef = useRef<HTMLDivElement | null>(null);
   const startX = useRef<number | null>(null);
@@ -31,6 +32,7 @@ export default function VotingPage() {
   const resetCard = () => {
     setOffsetX(0);
     setIsDragging(false);
+    setIsCardVisible(true);
   };
 
   useEffect(() => {
@@ -136,6 +138,7 @@ export default function VotingPage() {
     if (!idea) return;
 
     setIsDragging(false);
+    setIsCardVisible(false);
     setOffsetX(0);
     setIsFetchingIdea(true);
 
@@ -179,7 +182,7 @@ export default function VotingPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-slate-500 flex items-center justify-center">
-           <Loader2 className="h-8 w-8 animate-spin text-white" />
+        <Loader2 className="h-8 w-8 animate-spin text-white" />
       </div>
     );
   }
@@ -230,6 +233,7 @@ export default function VotingPage() {
         style={{
           transform: `translateX(${offsetX}px)`,
           transition: isDragging ? 'none' : 'transform 0.3s ease',
+          visibility: isCardVisible ? 'visible' : 'hidden',
         }}
         className={clsx(
           'relative bg-white w-full max-w-[360px] h-[60vh] rounded-2xl shadow-lg p-6 flex flex-col justify-between text-center select-none touch-none',
