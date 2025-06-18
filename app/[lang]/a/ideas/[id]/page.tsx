@@ -109,7 +109,7 @@ function IdeaDetailPageContent() {
 
           if (data.payload.is_admin && ideaData.status === 1) {
             // Fetch likes/dislikes from the voting API
-            const votesRes = await fetch(`http://37.27.182.28:3001/v1/voting/${id}`, {
+            const votesRes = await fetch(`https://api-staging.idender.services.nvassiljev.com/v1/voting/${id}`, {
               headers: { Authorization: `Bearer ${token}` },
               credentials: "include",
             });
