@@ -105,7 +105,7 @@ export default function Header() {
 
   return (
     <header className="bg-slate-800 text-white p-4 sticky top-0 z-20 w-full flex items-center h-16 shadow-md min-w-[320px] sm:min-w-[375px] md:min-w-[768px] lg:min-w-[1024px] max-w-screen-2xl mx-auto px-4 relative">
-      <div className="flex items-center">
+      <div className="w-full max-w-5xl mx-auto flex items-center h-16 px-4">
         <button
           onClick={handleLogout}
           className="flex items-center gap-2 hover:text-slate-300 transition-colors"

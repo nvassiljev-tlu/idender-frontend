@@ -186,7 +186,7 @@ export default function VotingPage() {
 
   if (isFetchingIdea) {
     return (
-      <div className="min-h-screen bg-slate-500 flex flex-col justify-center items-center text-white px-4">
+      <div className="min-h-screen w-full bg-slate-500 flex flex-col justify-center items-center text-white px-0 py-8 relative">
         <div className="flex flex-col items-center gap-2 mt-10">
           <Loader2 className="h-8 w-8 animate-spin text-white" />
           <p className="text-base">Loading idea...</p>
@@ -210,7 +210,7 @@ export default function VotingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-500 flex flex-col items-center justify-center px-4 py-8 relative">
+    <div className="min-h-screen w-full bg-slate-500 flex flex-col items-center justify-center px-0 py-8 relative">
       <div
         ref={cardRef}
         onPointerDown={handlePointerDown}
