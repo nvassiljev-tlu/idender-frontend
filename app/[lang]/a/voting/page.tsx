@@ -187,9 +187,6 @@ export default function VotingPage() {
   if (isFetchingIdea) {
     return (
       <div className="min-h-screen bg-slate-500 flex flex-col justify-center items-center text-white px-4">
-        <div className="absolute top-4 left-4">
-          <h1 className="text-xl font-bold">IDENDER</h1>
-        </div>
         <div className="flex flex-col items-center gap-2 mt-10">
           <Loader2 className="h-8 w-8 animate-spin text-white" />
           <p className="text-base">Loading idea...</p>
@@ -201,9 +198,6 @@ export default function VotingPage() {
   if (!idea) {
     return (
       <div className="min-h-screen bg-slate-500 flex flex-col justify-center items-center text-white px-4">
-        <div className="absolute top-10 left-1/2 transform -translate-x-1/2">
-          <h1 className="text-xl font-bold">IDENDER</h1>
-        </div>
         <div className="text-base mt-10 text-center">No more ideas to vote on!</div>
         <Button
           className="mt-6 w-40 rounded-none bg-white text-slate-700 hover:bg-slate-200"
@@ -217,10 +211,6 @@ export default function VotingPage() {
 
   return (
     <div className="min-h-screen bg-slate-500 flex flex-col items-center justify-center px-4 py-8 relative">
-      <div className="absolute top-10 left-1/2 transform -translate-x-1/2">
-        <h1 className="text-xl font-bold text-white">IDENDER</h1>
-      </div>
-
       <div
         ref={cardRef}
         onPointerDown={handlePointerDown}
