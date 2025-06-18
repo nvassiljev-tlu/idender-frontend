@@ -130,7 +130,7 @@ export default function MyIdeasPage() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-start min-h-screen bg-slate-500 text-white font-sans px-4 py-8">
+    <div className="flex flex-col items-center justify-start min-h-screen bg-slate-500 text-white font-sans px-4 py-8 break-words">
       <h1 className="text-2xl font-bold mb-6">{t("myIdeas.title")}</h1>
 
       <div className="w-full max-w-2xl bg-slate-600 p-6 rounded-lg shadow space-y-4">

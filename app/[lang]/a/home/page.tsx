@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import Cookie from 'js-cookie';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import i18n from '../../../i18n/client';
@@ -89,28 +89,29 @@ export default function IdenderDashboard() {
     checkLogin();
   }, [router]);
 
-  const fetchNews = async () => {
-    try {
-      const token = Cookie.get('sid');
-      const res = await fetch('https://api-staging.idender.services.nvassiljev.com/v1/news/recent', {
-        method: 'GET',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-      });
+  const fetchNews = useCallback(async () => {
+  try {
+    const token = Cookie.get('sid');
+    const res = await fetch('https://api-staging.idender.services.nvassiljev.com/v1/news/recent', {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
-      if (res.ok) {
-        const data = await res.json();
-        setNews(data.payload);
-      } else {
-        setError(t('fetchError'));
-      }
-    } catch (err) {
+    if (res.ok) {
+      const data = await res.json();
+      setNews(data.payload);
+    } else {
       setError(t('fetchError'));
     }
-  };
+  } catch (err) {
+    console.error(err);
+    setError(t('fetchError'));
+  }
+}, [t]);
 
   const handleCreateIdea = () => {
     router.push(`/${lang}/a/new-idea`);
