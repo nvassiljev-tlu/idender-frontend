@@ -27,9 +27,13 @@ body {
     font-weight: 300;
     font-size: 1rem; /* logo for welcome, smaller */
   }
+
+  /* Adjust margin for mobile
   .mt-16 {
-    margin-top: 4rem !important; /* Adjust margin for mobile */
+    margin-top: 4rem !important;  
   }
+  */
+  
 }
 
 @custom-variant dark (&:is(.dark *));
