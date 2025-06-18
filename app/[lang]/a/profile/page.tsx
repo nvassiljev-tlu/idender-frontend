@@ -102,53 +102,59 @@ export default function ProfilePage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-500 flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-white" />
+      <div className="fixed inset-0 bg-slate-100 flex items-center justify-center z-50">
+        <Loader2 className="h-8 w-8 animate-spin text-slate-800" />
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-slate-500 text-white font-sans px-4">
-      <h1 className="text-2xl font-bold mb-6">{t('myProfile')}</h1>
+    <div className="min-h-screen bg-slate-200 text-slate-800 flex flex-col min-w-[320px]">
+      <main className="w-full max-w-6xl mx-auto p-4 flex-1 overflow-y-auto pt-16 min-w-[320px]">
+        <section className="mb-20 w-full max-w-5xl min-w-[320px] sm:min-w-[600px] mx-auto">
+          <h1 className="text-2xl font-bold mb-6 text-center">{t('myProfile')}</h1>
 
-      <div className="bg-slate-600 text-white p-6 rounded-lg shadow w-full max-w-sm space-y-4">
-        {showAlert && (
-          <Alert className="mb-4 border-green-500 bg-green-100 text-green-700">
-            <CheckCircle className="h-5 w-5 text-green-600" />
+          <div className="bg-white text-slate-800 p-6 rounded-lg shadow w-full space-y-4">
+            {showAlert && (
+              <Alert className="mb-4 border-green-500 bg-green-100 text-green-700">
+                <CheckCircle className="h-5 w-5 text-green-600" />
+                <div>
+                  <AlertTitle>{t('success')}</AlertTitle>
+                  <AlertDescription>{t('updateSuccess')}</AlertDescription>
+                </div>
+              </Alert>
+            )}
+
+            <TextField label={t('fullName')} value={`${user.firstName} ${user.lastName}`} />
+            <TextField label={t('email')} value={user.email} />
+
             <div>
-              <AlertTitle>{t('success')}</AlertTitle>
-              <AlertDescription>{t('updateSuccess')}</AlertDescription>
+              <label className="block text-sm mb-1">{t('preferredLanguage')}</label>
+              <select
+                className="w-full p-2 border border-slate-400 bg-white text-slate-800 rounded text-sm"
+                value={selectedLang}
+                onChange={(e) => setSelectedLang(e.target.value)}
+              >
+                {languages.map((l) => (
+                  <option key={l.code} value={l.code}>
+                    {l.label}
+                  </option>
+                ))}
+              </select>
             </div>
-          </Alert>
-        )}
 
-        <TextField label={t('fullName')} value={`${user.firstName} ${user.lastName}`} />
-        <TextField label={t('email')} value={user.email} />
+            <Button onClick={handleUpdate} className="w-full bg-slate-800 text-white hover:bg-slate-700 rounded-none">
+              {t('updateBtn')}
+            </Button>
 
-        <div>
-          <label className="block text-sm mb-1">{t('preferredLanguage')}</label>
-          <select
-            className="w-full p-2 border border-slate-400 bg-slate-700 text-white rounded text-sm"
-            value={selectedLang}
-            onChange={(e) => setSelectedLang(e.target.value)}
-          >
-            {languages.map((l) => (
-              <option key={l.code} value={l.code}>
-                {l.label}
-              </option>
-            ))}
-          </select>
-        </div>
+            <Button onClick={() => router.push(`/${lang}/a/home`)} className="w-full bg-slate-600 text-white hover:bg-slate-700 rounded-none">
+              {t('backToHome')}
+            </Button>
+          </div>
+        </section>
+      </main>
 
-        <Button onClick={handleUpdate} className="w-full bg-white text-slate-700 hover:bg-slate-300 rounded-none">
-          {t('updateBtn')}
-        </Button>
-
-        <Button onClick={() => router.push(`/${lang}/a/home`)} className="w-full bg-slate-700 text-white hover:bg-slate-800 rounded-none">
-          {t('backToHome')}
-        </Button>
-      </div>
+      <div className="h-20 sm:hidden"></div>
     </div>
   );
 }
@@ -161,7 +167,7 @@ function TextField({ label, value }: { label: string; value: string }) {
         type="text"
         value={value}
         readOnly
-        className="w-full p-2 border border-slate-400 bg-slate-700 text-white rounded text-sm"
+        className="w-full p-2 border border-slate-400 bg-slate-100 text-slate-800 rounded text-sm"
       />
     </div>
   );
