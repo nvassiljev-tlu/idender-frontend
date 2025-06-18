@@ -104,25 +104,26 @@ export default function Header() {
   if (!ready) return null;
 
   return (
-    <header className="bg-slate-800 text-white p-4 sticky justify-between items-center top-0 z-20 w-full flex h-16 shadow-md min-w-[320px] sm:min-w-[375px] md:min-w-[768px] lg:min-w-[1024px] max-w-screen-2xl mx-auto px-4">
-      <button
-        onClick={handleLogout}
-        className="flex items-center gap-2 hover:text-slate-300 transition-colors"
-        aria-label={t('header.logout')}
-      >
-        <LogoutIcon />
-        <span className="hidden sm:inline">{t('header.logout')}</span>
-      </button>
-
+    <header className="bg-slate-800 text-white p-4 sticky top-0 z-20 w-full flex items-center h-16 shadow-md min-w-[320px] sm:min-w-[375px] md:min-w-[768px] lg:min-w-[1024px] max-w-screen-2xl mx-auto px-4 relative">
+      <div className="flex items-center">
+        <button
+          onClick={handleLogout}
+          className="flex items-center gap-2 hover:text-slate-300 transition-colors"
+          aria-label={t('header.logout')}
+        >
+          <LogoutIcon />
+          <span className="hidden sm:inline">{t('header.logout')}</span>
+        </button>
+      </div>
       <button
         onClick={() => router.push(`/${lang}/a/home`)}
-        className="text-xl font-bold hover:text-slate-300 transition-colors"
+        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-xl font-bold hover:text-slate-300 transition-colors"
         aria-label="Return to home"
+        style={{ pointerEvents: 'auto' }}
       >
         Idender
       </button>
-
-      <div className="relative" ref={profileMenuRef}>
+      <div className="flex items-center ml-auto" ref={profileMenuRef}>
         <button
           onClick={() => setShowProfileMenu(!showProfileMenu)}
           className="p-1 rounded-full hover:bg-slate-700 transition-colors"
@@ -131,9 +132,12 @@ export default function Header() {
         >
           <UserIcon />
         </button>
-
         {showProfileMenu && (
-          <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50" onMouseLeave={() => setShowProfileMenu(false)}>
+          <div
+            className="absolute right-4 top-full mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50"
+            style={{ minWidth: '12rem' }}
+            onMouseLeave={() => setShowProfileMenu(false)}
+          >
             <button onClick={() => router.push(`/${lang}/a/profile`)} className="block w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-100">
               {t('header.myProfile')}
             </button>
