@@ -55,7 +55,7 @@ export default function MyIdeasPage() {
           return;
         }
 
-        const res = await fetch('http://37.27.182.28:3001/v1/oauth/me', {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/oauth/me`, {
           method: 'GET',
           credentials: 'include',
           headers: {
@@ -90,7 +90,7 @@ export default function MyIdeasPage() {
       setIsFetchingIdeas(true);
       try {
         const token = Cookie.get('sid');
-        const res = await fetch(`http://37.27.182.28:3001/v1/users/${userId}/ideas`, {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/users/${userId}/ideas`, {
           method: 'GET',
           credentials: 'include',
           headers: {
