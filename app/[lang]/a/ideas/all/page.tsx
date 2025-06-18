@@ -52,7 +52,7 @@ export default function AllIdeasAdminPage() {
       setLoading(true);
       try {
         const token = Cookie.get('sid');
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/ideas`, {
+        const res = await fetch(`https://api-staging.idender.services.nvassiljev.com/v1/ideas`, {
           headers: { Authorization: `Bearer ${token}` },
           credentials: 'include',
         });
@@ -85,7 +85,7 @@ export default function AllIdeasAdminPage() {
   const handleChangeStatus = async (id: string, newStatus: number) => {
     try {
       const token = Cookie.get('sid');
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/ideas/${id}/status`, {
+      const res = await fetch(`http://37.27.182.28:3001/v1/ideas/${id}/status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

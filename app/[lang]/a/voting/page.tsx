@@ -45,7 +45,7 @@ export default function VotingPage() {
           return;
         }
 
-        const sessionResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/oauth/me`, {
+        const sessionResponse = await fetch('https://api-staging.idender.services.nvassiljev.com/v1/oauth/me', {
           method: 'GET',
           credentials: 'include',
           headers: {
@@ -81,7 +81,7 @@ useEffect(() => {
     setIsFetchingIdea(true);
     try {
       const token = Cookie.get('sid');
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/voting`, {
+      const res = await fetch('https://api-staging.idender.services.nvassiljev.com/v1/voting', {
         method: 'GET',
         credentials: 'include',
         headers: {
@@ -161,7 +161,7 @@ useEffect(() => {
 
     try {
       const token = Cookie.get('sid');
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/voting/${idea.id}`, {
+      const res = await fetch(`https://api-staging.idender.services.nvassiljev.com/v1/voting/${idea.id}`, {
         method: 'POST',
         credentials: 'include',
         headers: {

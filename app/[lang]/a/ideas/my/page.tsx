@@ -55,7 +55,7 @@ export default function MyIdeasPage() {
           return;
         }
 
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/oauth/me`, {
+        const res = await fetch('https://api-staging.idender.services.nvassiljev.com/v1/oauth/me', {
           method: 'GET',
           credentials: 'include',
           headers: {
@@ -90,7 +90,7 @@ export default function MyIdeasPage() {
       setIsFetchingIdeas(true);
       try {
         const token = Cookie.get('sid');
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/users/${userId}/ideas`, {
+        const res = await fetch(`https://api-staging.idender.services.nvassiljev.com/v1/users/${userId}/ideas`, {
           method: 'GET',
           credentials: 'include',
           headers: {
@@ -130,10 +130,10 @@ export default function MyIdeasPage() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-start min-h-screen bg-slate-500 text-white font-sans px-4 py-8 text-break">
-      <h1 className="text-2xl font-bold mb-6 text-break">{t("myIdeas.title")}</h1>
+    <div className="flex flex-col items-center justify-start min-h-screen bg-slate-500 text-white font-sans px-4 py-8">
+      <h1 className="text-2xl font-bold mb-6">{t("myIdeas.title")}</h1>
 
-      <div className="w-full max-w-2xl bg-slate-600 p-6 rounded-lg shadow space-y-4 text-break">
+      <div className="w-full max-w-2xl bg-slate-600 p-6 rounded-lg shadow space-y-4">
         {error && (
           <Alert className="border-red-500 bg-red-100 text-red-700">
             <XCircle className="h-5 w-5 text-red-600" />
@@ -160,8 +160,8 @@ export default function MyIdeasPage() {
             key={idea.id} 
             onClick={() => handleIdeaClick(idea.id)}
             className="border border-slate-400 p-4 rounded bg-slate-700 cursor-pointer hover:bg-slate-600 transition-colors">
-            <h2 className="text-lg font-semibold text-break">{idea.title}</h2>
-            <p className="text-sm text-slate-300 mb-2 text-break">{idea.description}</p>
+            <h2 className="text-lg font-semibold">{idea.title}</h2>
+            <p className="text-sm text-slate-300 mb-2">{idea.description}</p>
             <p className="text-sm font-semibold">
               {t("status.label")}: {statusMap[idea.status] || 'Unknown'}
             </p>

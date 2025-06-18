@@ -64,7 +64,7 @@ export default function SignupPage() {
     }
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/oauth/signup`, {
+      const res = await fetch('https://api-staging.idender.services.nvassiljev.com/v1/oauth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, first_name: firstName, last_name: lastName, password }),
@@ -93,7 +93,7 @@ export default function SignupPage() {
     }
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/oauth/otp`, {
+      const res = await fetch('https://api-staging.idender.services.nvassiljev.com/v1/oauth/otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: userEmail, code: otp }),
@@ -115,8 +115,6 @@ export default function SignupPage() {
       showError(t('otpFailed'), message);
     }
   };
-
-  console.log('API URL:', process.env.NEXT_PUBLIC_API_URL);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-slate-500 text-slate-800 font-sans px-4">

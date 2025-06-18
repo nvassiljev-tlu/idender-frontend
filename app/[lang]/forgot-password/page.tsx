@@ -37,7 +37,7 @@ export default function ForgotPasswordPage() {
     setLoading(true);
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/oauth/forgot-password`, {
+      const res = await fetch('https://api-staging.idender.services.nvassiljev.com/v1/oauth/forgot-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),

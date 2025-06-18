@@ -54,7 +54,7 @@ export function LoginForm() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setLoading(true)
     try {
-      const response = await fetch("http://37.27.182.28:3001/v1/oauth/login", {
+      const response = await fetch("https://api-staging.idender.services.nvassiljev.com/v1/oauth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

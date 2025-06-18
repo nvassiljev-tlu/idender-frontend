@@ -30,7 +30,7 @@ export default function LoginPage() {
 
     const checkLogin = async () => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/oauth/me`, {
+        const res = await fetch('https://api-staging.idender.services.nvassiljev.com/v1/oauth/me', {
           method: 'GET',
           credentials: 'include',
           headers: {

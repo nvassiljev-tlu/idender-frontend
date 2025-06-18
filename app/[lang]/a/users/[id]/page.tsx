@@ -63,11 +63,11 @@ export default function UserDetailPage() {
       }
 
       const [userRes, ideasRes] = await Promise.all([
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/users/${userId}`, {
+        fetch(`https://api-staging.idender.services.nvassiljev.com/v1/users/${userId}`, {
           headers: { Authorization: `Bearer ${token}` },
           credentials: 'include',
         }),
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/users/${userId}/ideas`, {
+        fetch(`https://api-staging.idender.services.nvassiljev.com/v1/users/${userId}/ideas`, {
           headers: { Authorization: `Bearer ${token}` },
           credentials: 'include',
         }),
@@ -108,7 +108,7 @@ export default function UserDetailPage() {
     if (!user) return;
     try {
       const token = Cookie.get('sid');
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/users/${user.id}`, {
+      const res = await fetch(`https://api-staging.idender.services.nvassiljev.com/v1/users/${user.id}`, {
         method: 'PATCH',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -134,7 +134,7 @@ export default function UserDetailPage() {
     if (!user) return;
     try {
       const token = Cookie.get('sid');
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/users/${user.id}/avatar`, {
+      const res = await fetch(`https://api-staging.idender.services.nvassiljev.com/v1/users/${user.id}/avatar`, {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${token}`,
