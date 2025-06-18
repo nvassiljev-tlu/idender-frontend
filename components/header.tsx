@@ -104,7 +104,7 @@ export default function Header() {
   if (!ready) return null;
 
   return (
-    <header className="bg-slate-800 text-white p-4 sticky justify-between items-center top-0 z-20 w-full flex h-16 shadow-md">
+    <header className="bg-slate-800 text-white p-4 sticky justify-between items-center top-0 z-20 w-full flex h-16 shadow-md min-w-[320px] sm:min-w-[375px] md:min-w-[768px] lg:min-w-[1024px] max-w-screen-2xl mx-auto px-4">
       <button
         onClick={handleLogout}
         className="flex items-center gap-2 hover:text-slate-300 transition-colors"
