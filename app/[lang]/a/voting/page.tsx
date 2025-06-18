@@ -179,10 +179,7 @@ export default function VotingPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-slate-500 flex items-center justify-center">
-        <div className="flex flex-col items-center gap-2">
-          <Loader2 className="h-8 w-8 animate-spin text-white" />
-          <p className="text-sm text-white">Checking authentication...</p>
-        </div>
+           <Loader2 className="h-8 w-8 animate-spin text-white" />
       </div>
     );
   }
