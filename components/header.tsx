@@ -138,19 +138,43 @@ export default function Header() {
             style={{ minWidth: '12rem' }}
             onMouseLeave={() => setShowProfileMenu(false)}
           >
-            <button onClick={() => router.push(`/${lang}/a/profile`)} className="block w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-100">
+            <button
+              onClick={() => {
+                setShowProfileMenu(false);
+                router.push(`/${lang}/a/profile`);
+              }}
+              className="block w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-100"
+            >
               {t('header.myProfile')}
             </button>
-            <button onClick={() => router.push(`/${lang}/a/ideas/my`)} className="block w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-100">
+            <button
+              onClick={() => {
+                setShowProfileMenu(false);
+                router.push(`/${lang}/a/ideas/my`);
+              }}
+              className="block w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-100"
+            >
               {t('header.myIdeas')}
             </button>
             {isAdmin && (
               <>
                 <div className="border-t border-gray-200 my-1" />
-                <button onClick={() => router.push(`/${lang}/a/ideas/all`)} className="block w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-100">
+                <button
+                  onClick={() => {
+                    setShowProfileMenu(false);
+                    router.push(`/${lang}/a/ideas/all`);
+                  }}
+                  className="block w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-100"
+                >
                   {t('header.allIdeas')}
                 </button>
-                <button onClick={() => router.push(`/${lang}/a/users`)} className="block w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-100">
+                <button
+                  onClick={() => {
+                    setShowProfileMenu(false);
+                    router.push(`/${lang}/a/users`);
+                  }}
+                  className="block w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-100"
+                >
                   {t('header.allUsers')}
                 </button>
               </>
