@@ -176,9 +176,6 @@ export default function VotingPage() {
     }
   };
 
-  const maxOffset = 150;
-  const overlayOpacity = Math.min(Math.abs(offsetX) / maxOffset, 1) * 0.3;
-
   if (isLoading) {
     return (
       <div className="min-h-screen bg-slate-500 flex items-center justify-center">
@@ -232,8 +229,9 @@ export default function VotingPage() {
         onPointerCancel={resetCard}
         style={{
           transform: `translateX(${offsetX}px)`,
-          transition: isDragging ? 'none' : 'transform 0.3s ease',
+          transition: isDragging ? 'none' : 'transform 0.3s ease, opacity 0.3s ease',
           visibility: isCardVisible ? 'visible' : 'hidden',
+          opacity: Math.max(1 - Math.abs(offsetX) / 200, 0),
         }}
         className={clsx(
           'relative bg-white w-full max-w-[360px] h-[60vh] rounded-2xl shadow-lg p-6 flex flex-col justify-between text-center select-none touch-none',
@@ -243,11 +241,6 @@ export default function VotingPage() {
           }
         )}
       >
-        <div
-          className="absolute top-0 left-0 w-full h-full rounded-2xl pointer-events-none z-0"
-          style={{ backgroundColor: `rgba(0,0,0,${overlayOpacity})` }}
-        />
-
         <div className="relative z-10 overflow-hidden flex-1 flex flex-col">
           <h2 className="text-lg sm:text-xl font-bold mb-3 text-black">{idea.title}</h2>
           <div className="overflow-auto max-h-[25vh] px-1">
