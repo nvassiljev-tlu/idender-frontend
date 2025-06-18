@@ -30,7 +30,7 @@ export default function LoginPage() {
 
     const checkLogin = async () => {
       try {
-        const res = await fetch('http://37.27.182.28:3001/v1/oauth/me', {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/oauth/me`, {
           method: 'GET',
           credentials: 'include',
           headers: {

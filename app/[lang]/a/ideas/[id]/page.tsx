@@ -88,7 +88,7 @@ function IdeaDetailPageContent() {
           return;
         }
 
-        const ideaResponse = await fetch(`http://37.27.182.28:3001/v1/ideas/${id}`, {
+        const ideaResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/ideas/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
           credentials: "include",
         });
@@ -109,7 +109,7 @@ function IdeaDetailPageContent() {
 
           if (data.payload.is_admin && ideaData.status === 1) {
             // Fetch likes/dislikes from the voting API
-            const votesRes = await fetch(`http://37.27.182.28:3001/v1/voting/${id}`, {
+            const votesRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/voting/${id}`, {
               headers: { Authorization: `Bearer ${token}` },
               credentials: "include",
             });
@@ -126,7 +126,7 @@ function IdeaDetailPageContent() {
           setError("Failed to load idea.");
         }
 
-        const commentsResponse = await fetch(`http://37.27.182.28:3001/v1/ideas/${id}/comments`, {
+        const commentsResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/ideas/${id}/comments`, {
           headers: { Authorization: `Bearer ${token}` },
           credentials: "include",
         });
@@ -165,7 +165,7 @@ function IdeaDetailPageContent() {
     if (!newComment.trim()) return;
     try {
       const token = Cookie.get("sid");
-      const response = await fetch(`http://37.27.182.28:3001/v1/ideas/${id}/comments`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/ideas/${id}/comments`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         credentials: "include",
@@ -197,7 +197,7 @@ function IdeaDetailPageContent() {
     if (!isAdmin) return;
     try {
       const token = Cookie.get("sid");
-      const response = await fetch(`http://37.27.182.28:3001/v1/ideas/${id}/comments/${commentId}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/ideas/${id}/comments/${commentId}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
         credentials: "include",
@@ -218,7 +218,7 @@ function IdeaDetailPageContent() {
     if (!isAdmin || typeof newStatus !== 'number') return;
     try {
       const token = Cookie.get("sid");
-      const response = await fetch(`http://37.27.182.28:3001/v1/ideas/${id}/status`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/v1/ideas/${id}/status`, {
         method: "PUT",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         credentials: "include",
