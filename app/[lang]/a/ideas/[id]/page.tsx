@@ -126,7 +126,7 @@ function IdeaDetailPageContent() {
           setError("Failed to load idea.");
         }
 
-        const commentsResponse = await fetch(`http://37.27.182.28:3001/v1/ideas/${id}/comments`, {
+        const commentsResponse = await fetch(`https://api-staging.idender.services.nvassiljev.com/v1/ideas/${id}/comments`, {
           headers: { Authorization: `Bearer ${token}` },
           credentials: "include",
         });
@@ -165,7 +165,7 @@ function IdeaDetailPageContent() {
     if (!newComment.trim()) return;
     try {
       const token = Cookie.get("sid");
-      const response = await fetch(`http://37.27.182.28:3001/v1/ideas/${id}/comments`, {
+      const response = await fetch(`https://api-staging.idender.services.nvassiljev.com/v1/ideas/${id}/comments`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         credentials: "include",
@@ -197,7 +197,7 @@ function IdeaDetailPageContent() {
     if (!isAdmin) return;
     try {
       const token = Cookie.get("sid");
-      const response = await fetch(`http://37.27.182.28:3001/v1/ideas/${id}/comments/${commentId}`, {
+      const response = await fetch(`https://api-staging.idender.services.nvassiljev.com/v1/ideas/${id}/comments/${commentId}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
         credentials: "include",
@@ -218,7 +218,7 @@ function IdeaDetailPageContent() {
     if (!isAdmin || typeof newStatus !== 'number') return;
     try {
       const token = Cookie.get("sid");
-      const response = await fetch(`http://37.27.182.28:3001/v1/ideas/${id}/status`, {
+      const response = await fetch(`https://api-staging.idender.services.nvassiljev.com/v1/ideas/${id}/status`, {
         method: "PUT",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         credentials: "include",
