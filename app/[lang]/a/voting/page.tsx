@@ -20,7 +20,7 @@ export default function VotingPage() {
   const [idea, setIdea] = useState<Idea | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isFetchingIdea, setIsFetchingIdea] = useState(false);
-  const [lang, setLang] = useState("");
+  const [lang, setLang] = useState('');
 
   const cardRef = useRef<HTMLDivElement | null>(null);
   const startX = useRef<number | null>(null);
@@ -34,14 +34,14 @@ export default function VotingPage() {
   };
 
   useEffect(() => {
-
-    if (isLoading) return;
-
-    const checkSession = async () => {
+    const init = async () => {
       try {
         const token = Cookie.get('sid');
+        const language = Cookie.get('lang') || 'et';
+        setLang(language);
+
         if (!token) {
-          router.push('/login');
+          router.push(`/${language}/login`);
           return;
         }
 
@@ -56,72 +56,52 @@ export default function VotingPage() {
 
         if (!sessionResponse.ok) {
           Cookie.remove('sid');
-          const language = Cookie.get("lang") || 'et';
           router.push(`/${language}/login`);
           return;
         }
-        
-        const language = Cookie.get("lang") || 'et';
-        setLang(language);
+
+        setIsFetchingIdea(true);
+        const ideaRes = await fetch('https://api-staging.idender.services.nvassiljev.com/v1/voting', {
+          method: 'GET',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        if (ideaRes.status === 204) {
+          setIdea(null);
+        } else if (ideaRes.ok) {
+          const data = await ideaRes.json();
+          if (data.status === 'OPERATION-OK' && data.payload) {
+            setIdea({
+              id: data.payload.id,
+              title: data.payload.title,
+              description: data.payload.description,
+              author: data.payload.author,
+              categories: data.payload.categories || [],
+            });
+          } else {
+            setIdea(null);
+          }
+        } else {
+          throw new Error('Failed to load idea');
+        }
       } catch (err) {
-        console.error('Error checking session:', err);
+        console.error('Initialization failed:', err);
         Cookie.remove('sid');
-        const language = Cookie.get("lang") || 'et';
+        const language = Cookie.get('lang') || 'et';
         router.push(`/${language}/login`);
       } finally {
+        setIsFetchingIdea(false);
         setIsLoading(false);
+        resetCard();
       }
     };
 
-    checkSession();
-  }, [router, isLoading]);
-
-useEffect(() => {
-  const fetchIdea = async () => {
-    setIsFetchingIdea(true);
-    try {
-      const token = Cookie.get('sid');
-      const res = await fetch('https://api-staging.idender.services.nvassiljev.com/v1/voting', {
-        method: 'GET',
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (res.status === 204) {
-        setIdea(null);
-        return;
-      }
-
-      if (!res.ok) throw new Error('Failed to load idea');
-
-      const data = await res.json();
-      if (data.status === 'OPERATION-OK' && data.payload) {
-        setIdea({
-          id: data.payload.id,
-          title: data.payload.title,
-          description: data.payload.description,
-          author: data.payload.author,
-          categories: data.payload.categories || [],
-        });
-      } else {
-        setIdea(null);
-      }
-    } catch (err) {
-      console.error('Failed to load idea:', err);
-      setIdea(null);
-    } finally {
-      setIsFetchingIdea(false);
-      resetCard();
-    }
-  };
-
-  if (!isLoading) {
-    fetchIdea();
-  }
-}, [isLoading]);
+    init();
+  }, [router]);
 
   const handlePointerDown = (e: React.PointerEvent) => {
     startX.current = e.clientX;
@@ -199,10 +179,7 @@ useEffect(() => {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-slate-500 flex items-center justify-center">
-        <div className="flex flex-col items-center gap-2">
-          <Loader2 className="h-8 w-8 animate-spin text-white" />
-          <p className="text-sm text-white">Checking authentication...</p>
-        </div>
+           <Loader2 className="h-8 w-8 animate-spin text-white" />
       </div>
     );
   }
@@ -267,12 +244,13 @@ useEffect(() => {
           style={{ backgroundColor: `rgba(0,0,0,${overlayOpacity})` }}
         />
 
-        <div className="relative z-10">
+        <div className="relative z-10 overflow-hidden flex-1 flex flex-col">
           <h2 className="text-lg sm:text-xl font-bold mb-3 text-black">{idea.title}</h2>
-          <p className="text-gray-800 text-base sm:text-lg">{idea.description}</p>
+          <div className="overflow-auto max-h-[25vh] px-1">
+            <p className="text-gray-800 text-base sm:text-lg text-left whitespace-pre-wrap">{idea.description}</p>
+          </div>
         </div>
 
-        {/* Author and categories at the bottom */}
         <div className="relative z-10 mt-6">
           {idea.categories && idea.categories.length > 0 && (
             <div className="flex flex-wrap gap-2 justify-center mb-2">

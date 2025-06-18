@@ -120,7 +120,13 @@
   "myIdeas": "Minu ideed",
   "allIdeas": "Kõik ideed",
   "allUsers": "Kõik kasutajad"
-}
+},
+  "backToLogin": "Tagasi sisselogimisele",
+  "sendResetLink": "Saada lähtestamise link",
+  "resetPassword": "Lähtesta parool",
+  "newPassword": "Uus parool",
+  "confirmPassword": "Kinnita parool",
+  "resetPasswordButton": "Muuda parool"
 
  }
 

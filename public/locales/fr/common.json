@@ -120,6 +120,11 @@
   "myIdeas": "Mes idées",
   "allIdeas": "Toutes les idées",
   "allUsers": "Tous les utilisateurs"
-}
-
+},
+  "backToLogin": "Retour à la connexion",
+  "sendResetLink": "Envoyer le lien de réinitialisation",
+   "resetPassword": "Réinitialiser le mot de passe",
+  "newPassword": "Nouveau mot de passe",
+  "confirmPassword": "Confirmez le mot de passe",
+  "resetPasswordButton": "Changer le mot de passe"
 }

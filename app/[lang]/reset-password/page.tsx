@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import i18n from '../../i18n/client';
 import Cookie from "js-cookie";
@@ -11,10 +11,11 @@ import { Input } from "@/components/ui/input";
 
 export default function ResetPasswordPage() {
   const router = useRouter();
+  const params = useParams();
   const searchParams = useSearchParams();
   const email = searchParams.get('email');
   const code = searchParams.get('code');
-  const lang = searchParams.get('lang') || 'et';
+  const lang = typeof params.lang === 'string' ? params.lang : 'et';
 
   const { t } = useTranslation('common');
   const [ready, setReady] = useState(false);

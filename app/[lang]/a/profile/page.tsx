@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from 'react';
 import Cookies from 'js-cookie';
-import Image from 'next/image';
 import { useRouter, useParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -24,8 +23,6 @@ export default function ProfilePage() {
 
   const [user, setUser] = useState({ id: '', firstName: '', lastName: '', email: '' });
   const [selectedLang, setSelectedLang] = useState('en');
-  const [file, setFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [showAlert, setShowAlert] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [lang, setLang] = useState('');
@@ -75,14 +72,6 @@ export default function ProfilePage() {
     fetchUser();
   }, [router]);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFile = e.target.files?.[0];
-    if (selectedFile) {
-      setFile(selectedFile);
-      setPreviewUrl(URL.createObjectURL(selectedFile));
-    }
-  };
-
   const handleUpdate = async () => {
     const token = Cookies.get('sid');
     if (!token) return;
@@ -90,9 +79,8 @@ export default function ProfilePage() {
     try {
       const formData = new FormData();
       formData.append('preferred_language', selectedLang);
-      if (file) formData.append('profile_picture', file);
 
-      const res = await axios.patch(
+      await axios.patch(
         `https://api-staging.idender.services.nvassiljev.com/v1/users/${user.id}`,
         formData,
         {
@@ -103,7 +91,6 @@ export default function ProfilePage() {
         }
       );
 
-      console.log('Update response:', res.data);
       Cookies.set('lang', selectedLang);
       i18n.changeLanguage(selectedLang);
       setShowAlert(true);
@@ -152,25 +139,6 @@ export default function ProfilePage() {
               </option>
             ))}
           </select>
-        </div>
-
-        <div>
-          <label className="block text-sm mb-1">{t('profilePicture')}</label>
-          <input
-            type="file"
-            accept="image/png"
-            onChange={handleFileChange}
-            className="w-full text-sm"
-          />
-          {previewUrl && (
-            <Image
-              src={previewUrl}
-              alt="Profile preview"
-              width={100}
-              height={100}
-              className="mt-2 rounded-full object-cover"
-            />
-          )}
         </div>
 
         <Button onClick={handleUpdate} className="w-full bg-white text-slate-700 hover:bg-slate-300 rounded-none">

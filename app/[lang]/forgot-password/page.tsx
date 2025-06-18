@@ -102,7 +102,7 @@ export default function ForgotPasswordPage() {
             className="w-full bg-slate-800 text-white py-2 px-4 rounded hover:bg-slate-500 transition duration-200 flex items-center justify-center"
           >
             {(loading || navigating) && <Loader2 className="h-5 w-5 animate-spin mr-2" />}
-            {loading ? t('sending') : t('send reset link')}
+            {loading ? t('sending') : t('sendResetLink')}
           </Button>
         </form>
 
