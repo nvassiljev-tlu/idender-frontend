@@ -47,7 +47,7 @@ export default function Header() {
         const token = Cookie.get('sid');
         if (!token) return;
 
-        const response = await fetch('http://37.27.182.28:3001/v1/oauth/me', {
+        const response = await fetch('https://api-staging.idender.services.nvassiljev.com/v1/oauth/me', {
           headers: { Authorization: `Bearer ${token}` },
           credentials: 'include',
         });
@@ -70,7 +70,7 @@ export default function Header() {
   const handleLogout = async () => {
     try {
       const token = Cookie.get('sid');
-      await fetch('http://37.27.182.28:3001/v1/oauth/logout', {
+      await fetch('https://api-staging.idender.services.nvassiljev.com/v1/oauth/logout', {
         method: 'POST',
         credentials: 'include',
         headers: {
