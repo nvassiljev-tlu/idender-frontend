@@ -46,7 +46,7 @@ export default function ProfilePage() {
       }
 
       try {
-        const res = await axios.get('http://37.27.182.28:3001/v1/oauth/me', {
+        const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/v1/oauth/me`, {
           headers: { Authorization: `Bearer ${token}` },
           withCredentials: true,
         });
@@ -93,7 +93,7 @@ export default function ProfilePage() {
       if (file) formData.append('profile_picture', file);
 
       const res = await axios.patch(
-        `http://37.27.182.28:3001/v1/users/${user.id}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/v1/users/${user.id}`,
         formData,
         {
           headers: {
