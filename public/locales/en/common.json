@@ -120,5 +120,11 @@
   "myIdeas": "My Ideas",
   "allIdeas": "All Ideas",
   "allUsers": "All Users"
-}
+},
+"backToLogin": "Back to Login",
+  "sendResetLink": "Send Reset Link",
+  "resetPassword": "Reset Password",
+  "newPassword": "New Password",
+  "confirmPassword": "Confirm Password",
+  "resetPasswordButton": "Change Password"
 }
