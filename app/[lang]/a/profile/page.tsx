@@ -77,19 +77,18 @@ export default function ProfilePage() {
     if (!token) return;
 
     try {
-      const formData = new FormData();
-      formData.append('preferred_language', selectedLang);
-
-      await axios.patch(
+      const response = await axios.patch(
         `https://api-staging.idender.services.nvassiljev.com/v1/users/${user.id}`,
-        formData,
+        { preferred_language: selectedLang },
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
           withCredentials: true,
         }
       );
+
+      if (response.data.status !== 'OPERATION-OK') {
+        throw new Error('Failed to update profile');
+      }
 
       Cookies.set('lang', selectedLang);
       i18n.changeLanguage(selectedLang);
