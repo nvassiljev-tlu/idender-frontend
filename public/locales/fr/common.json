@@ -126,5 +126,11 @@
    "resetPassword": "Réinitialiser le mot de passe",
   "newPassword": "Nouveau mot de passe",
   "confirmPassword": "Confirmez le mot de passe",
-  "resetPasswordButton": "Changer le mot de passe"
+  "resetPasswordButton": "Changer le mot de passe",
+   "newsTitle": "Actualités",
+  "fetchError": "Échec du chargement des actualités",
+  "noNews": "Aucune actualité à afficher.",
+  "refresh": "Rafraîchir",
+  "createIdea": "Créer une idée",
+  "voting": "Vote"
 }

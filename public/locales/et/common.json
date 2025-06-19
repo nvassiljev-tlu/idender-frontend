@@ -126,7 +126,13 @@
   "resetPassword": "Lähtesta parool",
   "newPassword": "Uus parool",
   "confirmPassword": "Kinnita parool",
-  "resetPasswordButton": "Muuda parool"
+  "resetPasswordButton": "Muuda parool",
+  "newsTitle": "Uudised",
+  "fetchError": "Uudiste laadimine ebaõnnestus",
+  "noNews": "Kuvamiseks pole uudiseid.",
+  "refresh": "Värskenda",
+  "createIdea": "Loo idee",
+  "voting": "Hääletamine"
 
  }
 
