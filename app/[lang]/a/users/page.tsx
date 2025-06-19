@@ -26,22 +26,86 @@ type User = {
   is_superadmin?: boolean;
 };
 
-type RawUser = {
-  id: string;
-  first_name?: string;
-  last_name?: string;
-  email?: string;
-  lang?: string;
-  profile_picture?: string;
-  is_active?: boolean;
-  is_admin?: boolean;
-  is_superadmin?: boolean;
-};
-
 export default function AllUsersAdminPage() {
   // 1. POST /v1/users/{id}/admin - чтобы дать админку
+  const grantAdmin = async (id: string) => {
+    setError('');
+    try {
+      const token = Cookie.get('sid');
+      const res = await fetch(`https://api-staging.idender.services.nvassiljev.com/v1/users/${id}/admin`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+      });
+      const data = await res.json();
+      if (!res.ok || data.status !== 'OPERATION-OK') {
+        throw new Error(data.error?.message || 'Failed to grant admin rights.');
+      }
+      updateUser(id, { is_admin: true });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Unexpected error';
+      setError(message);
+    }
+  };
+
   // 2. DELETE /v1/users/{id}/admin - чтобы забрать админку
+  const revokeAdmin = async (id: string) => {
+    setError('');
+    try {
+      const token = Cookie.get('sid');
+      const res = await fetch(`https://api-staging.idender.services.nvassiljev.com/v1/users/${id}/admin`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+      });
+      const data = await res.json();
+      if (!res.ok || data.status !== 'OPERATION-OK') {
+        throw new Error(data.error?.message || 'Failed to revoke admin rights.');
+      }
+      updateUser(id, { is_admin: false, is_superadmin: false });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Unexpected error';
+      setError(message);
+    }
+  };
+
   // 3. POST /v1/users/{id}/transfer - чтобы передать суперадмина
+  const transferSuperadmin = async (toUserId: string) => {
+    setTransferError('');
+    try {
+      const token = Cookie.get('sid');
+      const res = await fetch(`https://api-staging.idender.services.nvassiljev.com/v1/users/${toUserId}/transfer`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+      });
+      const data = await res.json();
+      if (!res.ok || data.status !== 'OPERATION-OK') {
+        throw new Error(data.error?.message || 'Failed to transfer superadmin rights.');
+      }
+      // Обновим роли локально
+      const target = users.find(u => u.id === toUserId);
+      if (target) {
+        updateUser(target.id, { is_admin: true, is_superadmin: true });
+      }
+      updateUser(toUserId, { is_superadmin: false });
+      setTransferAdminOpenFor(null);
+      setTransferEmail('');
+      setError('');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Unexpected error';
+      setTransferError(message);
+    }
+  };
   const [users, setUsers] = useState<User[]>([]);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [error, setError] = useState('');
@@ -71,8 +135,8 @@ export default function AllUsersAdminPage() {
         }),
       ]);
 
-      const usersData: { payload: RawUser[]; status: string } = await usersRes.json();
-      const currentUserData: { payload: { user: RawUser }; status: string } = await currentUserRes.json();
+      const usersData: { payload: User[]; status: string } = await usersRes.json();
+      const currentUserData: { payload: { user: User }; status: string } = await currentUserRes.json();
 
       if (
         usersRes.ok &&
@@ -86,7 +150,6 @@ export default function AllUsersAdminPage() {
           last_name: user.last_name ?? '',
           email: user.email ?? '',
           lang: user.lang ?? 'et',
-          avatar_url: user.profile_picture ?? '',
           is_active: user.is_active ?? true,
           is_admin: user.is_admin ?? false,
           is_superadmin: user.is_superadmin ?? false,
@@ -99,7 +162,6 @@ export default function AllUsersAdminPage() {
           last_name: u.last_name ?? '',
           email: u.email ?? '',
           lang: u.lang ?? 'et',
-          avatar_url: u.profile_picture ?? '',
           is_active: u.is_active ?? true,
           is_admin: u.is_admin ?? false,
           is_superadmin: u.is_superadmin ?? false,
@@ -158,7 +220,20 @@ export default function AllUsersAdminPage() {
       const token = Cookie.get('sid');
       let scopes: number[] = [];
 
-      if (role === 'user') scopes = [1]; // remove scope 3, and do not add scope 1
+      if (role === 'user') {
+        // Remove scope 3 (admin) and do not add scope 1 if user already has it
+        const getUserScopes = (id: string) => {
+          const user = users.find(u => u.id === id);
+          // If user is superadmin, treat as [15], if admin as [3], else [1]
+          if (user?.is_superadmin) return [15];
+          if (user?.is_admin) return [3];
+          return [1]; // If inactive, treat as user
+        };
+        const currentScopes = getUserScopes(id);
+        // Remove 3 if present, do not add 1 if already present
+        scopes = currentScopes.filter(s => s !== 3 && s !== 15);
+        if (!scopes.includes(1)) scopes.push(1);
+      }
       else if (role === 'admin') scopes = [3];
       else if (role === 'superadmin') scopes = [15];
 
@@ -368,36 +443,77 @@ export default function AllUsersAdminPage() {
                               setError('At least one admin must remain.');
                               return;
                             }
-                            assignRole(user.id, 'user');
+                            revokeAdmin(user.id);
                           }}
                         >
                           Remove Admin
                         </DropdownMenuItem>
                       )}
 
-                      {/* Супер-админ может снять права у других админов */}
+                      {/* Супер-админ может снять права у других админов или передать супер-админа */}
                       {user.id !== currentUserId && canRemoveAdmin(user) && (
-                        <DropdownMenuItem
-                          onClick={() => {
-                            if (checkAdminCount() <= 1) {
-                              setError('At least one admin must remain.');
-                              return;
-                            }
-                            assignRole(user.id, 'user');
-                          }}
-                        >
-                          Remove Admin
-                        </DropdownMenuItem>
+                        <>
+                          <DropdownMenuItem
+                            onClick={() => {
+                              if (checkAdminCount() <= 1) {
+                                setError('At least one admin must remain.');
+                                return;
+                              }
+                              revokeAdmin(user.id);
+                            }}
+                          >
+                            Remove Admin
+                          </DropdownMenuItem>
+                          {/* Супер-админ может передать права супер-админа другому пользователю */}
+                          {currentUser?.is_superadmin && user.is_admin && !user.is_superadmin && (
+                            <>
+                              {transferAdminOpenFor === user.id ? (
+                                <div className="p-2">
+                                  <input
+                                    type="email"
+                                    placeholder="Enter email to transfer"
+                                    value={transferEmail}
+                                    onChange={(e) => setTransferEmail(e.target.value)}
+                                    className="border p-1 rounded w-full"
+                                  />
+                                  {transferError && (
+                                    <div className="text-red-600 text-sm mt-1">{transferError}</div>
+                                  )}
+                                  <div className="flex gap-2 mt-2">
+                                    <Button size="sm" onClick={() => transferSuperadmin(user.id)}>
+                                      Transfer Superadmin
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => {
+                                        setTransferAdminOpenFor(null);
+                                        setTransferEmail('');
+                                        setTransferError('');
+                                      }}
+                                    >
+                                      Cancel
+                                    </Button>
+                                  </div>
+                                </div>
+                              ) : (
+                                <DropdownMenuItem onClick={() => setTransferAdminOpenFor(user.id)}>
+                                  Transfer Superadmin rights
+                                </DropdownMenuItem>
+                              )}
+                            </>
+                          )}
+                        </>
                       )}
                     </>
                   )}
 
                   {/* Обычные пользователи + возможность назначить админом, если текущий юзер админ */}
-                  {!user.is_admin && currentUser?.is_admin && (
-                    <DropdownMenuItem onClick={() => assignRole(user.id, 'admin')}>
+                    {!user.is_admin && currentUser?.is_admin && (
+                    <DropdownMenuItem onClick={() => grantAdmin(user.id)}>
                       Make Admin
                     </DropdownMenuItem>
-                  )}
+                    )}
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
