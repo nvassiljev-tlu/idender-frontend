@@ -120,9 +120,10 @@ export default function AllIdeasAdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-500 text-white px-4 py-8 flex flex-col items-center">
+    <div className="min-h-screen bg-slate-500 text-white px-4 py-8 flex justify-center">
       <div className="w-full max-w-2xl bg-slate-600 p-6 rounded-lg shadow space-y-4">
-        <h1 className="text-2xl font-bold mb-6">{t('allIdeas.title')}</h1>
+
+        <h1 className="text-2xl font-bold mb-6 text-center w-full">{t('allIdeas.title')}</h1>
 
         {error && (
           <Alert className="border-red-500 bg-red-100 text-red-700">
