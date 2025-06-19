@@ -6,6 +6,8 @@ import clsx from 'clsx';
 import { Button } from '@/components/ui/button';
 import Cookie from 'js-cookie';
 import { Loader2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import i18n from '../../../i18n/client';
 
 type Idea = {
   id: string;
@@ -17,10 +19,13 @@ type Idea = {
 
 export default function VotingPage() {
   const router = useRouter();
+  const { t } = useTranslation('common');
+
   const [idea, setIdea] = useState<Idea | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isFetchingIdea, setIsFetchingIdea] = useState(false);
   const [lang, setLang] = useState('');
+  const [ready, setReady] = useState(false);
   const [isCardVisible, setIsCardVisible] = useState(true);
 
   const cardRef = useRef<HTMLDivElement | null>(null);
@@ -37,16 +42,18 @@ export default function VotingPage() {
 
   useEffect(() => {
     const init = async () => {
+      const language = Cookie.get('lang') || 'et';
+      setLang(language);
+      if (i18n.language !== language) {
+        await i18n.changeLanguage(language);
+        Cookie.set('lang', language);
+      }
+      setReady(true);
+
+      const token = Cookie.get('sid');
+      if (!token) return router.push(`/${language}/login`);
+
       try {
-        const token = Cookie.get('sid');
-        const language = Cookie.get('lang') || 'et';
-        setLang(language);
-
-        if (!token) {
-          router.push(`/${language}/login`);
-          return;
-        }
-
         const sessionResponse = await fetch('https://api-staging.idender.services.nvassiljev.com/v1/oauth/me', {
           method: 'GET',
           credentials: 'include',
@@ -189,7 +196,7 @@ export default function VotingPage() {
       <div className="min-h-screen w-full bg-slate-500 flex flex-col justify-center items-center text-white px-0 py-8 relative">
         <div className="flex flex-col items-center gap-2 mt-10">
           <Loader2 className="h-8 w-8 animate-spin text-white" />
-          <p className="text-base">Loading idea...</p>
+          <p className="text-base">{t('loadingIdea')}</p>
         </div>
       </div>
     );
@@ -198,12 +205,12 @@ export default function VotingPage() {
   if (!idea) {
     return (
       <div className="min-h-screen bg-slate-500 flex flex-col justify-center items-center text-white px-4">
-        <div className="text-base mt-10 text-center">No more ideas to vote on!</div>
+        <div className="text-base mt-10 text-center">{t('noMoreIdeas')}</div>
         <Button
           className="mt-6 w-40 rounded-none bg-white text-slate-700 hover:bg-slate-200"
           onClick={() => router.push(`/${lang}/a/home`)}
         >
-          Go to Homepage
+          {t('goToHomepage')}
         </Button>
       </div>
     );
@@ -253,14 +260,14 @@ export default function VotingPage() {
           )}
           {idea.author && (
             <div className="text-xs text-gray-500 mt-1">
-              Submitted by: {idea.author}
+              {t('submittedBy')}: {idea.author}
             </div>
           )}
         </div>
       </div>
 
       <div className="text-sm text-white mt-4 select-none">
-        Swipe left — 👎 | Swipe right — 👍
+        {t('swipeInstruction')}
       </div>
     </div>
   );
