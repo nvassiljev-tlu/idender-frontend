@@ -97,6 +97,8 @@ export default function UserDetailPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
   const [showScopeMenu, setShowScopeMenu] = useState(false);
+  const [editingField, setEditingField] = useState<null | 'first_name' | 'last_name'>(null);
+  const [editValue, setEditValue] = useState('');
   const scopeMenuRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const pathname = usePathname();
@@ -216,8 +218,8 @@ export default function UserDetailPage() {
 
   const handleScopeChange = (scopeId: number, checked: boolean) => {
     if (
-      scopeId === 3 && // 3 = user:admin
-      !checked &&      // trying to uncheck
+      scopeId === 3 && 
+      !checked &&      
       scopes.some(s => s.id === 3 && s.assigned_by_other_admin)
     ) {
       setError('If admin has been assigned by other admin before, you cannot take his admin rights back.');
@@ -254,6 +256,42 @@ export default function UserDetailPage() {
     } catch (e: unknown) {
       setError(extractErrorMessage(e));
     }
+  };
+
+  const handleEditClick = (field: 'first_name' | 'last_name') => {
+    setEditingField(field);
+    setEditValue(user ? user[field] : '');
+  };
+
+  const handleEditSave = async () => {
+    if (!user || !editingField) return;
+    try {
+      const token = Cookie.get('sid');
+      const res = await fetch(`https://api-staging.idender.services.nvassiljev.com/v1/users/${user.id}`, {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ [editingField]: editValue }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data?.errors?.message || data?.error?.message || 'Failed to update name');
+        return;
+      }
+      setUser(prev => prev ? { ...prev, [editingField]: editValue } : prev);
+      setEditingField(null);
+      setEditValue('');
+    } catch (e) {
+      setError('Failed to update name');
+    }
+  };
+
+  const handleEditCancel = () => {
+    setEditingField(null);
+    setEditValue('');
   };
 
   useEffect(() => {
@@ -306,22 +344,43 @@ export default function UserDetailPage() {
         {/* Body */}
         <div className="p-6 space-y-6">
           <div className="flex flex-col md:flex-row gap-4">
-            <Button
-              onClick={() => {
-                const name = prompt('Enter new first name:', user.first_name);
-                if (name) updateName('first_name', name);
-              }}
-            >
-              Edit First Name
-            </Button>
-            <Button
-              onClick={() => {
-                const lastName = prompt('Enter new last name:', user.last_name);
-                if (lastName) updateName('last_name', lastName);
-              }}
-            >
-              Edit Last Name
-            </Button>
+            {/* Edit First Name */}
+            {editingField === 'first_name' ? (
+              <div className="flex gap-2 items-center">
+                <input
+                  type="text"
+                  value={editValue}
+                  onChange={e => setEditValue(e.target.value)}
+                  className="border rounded px-2 py-1 text-black bg-white"
+                  autoFocus
+                />
+                <Button size="sm" onClick={handleEditSave}>Save</Button>
+                <Button size="sm" variant="secondary" onClick={handleEditCancel}>Cancel</Button>
+              </div>
+            ) : (
+              <Button onClick={() => handleEditClick('first_name')}>
+                Edit First Name
+              </Button>
+            )}
+
+            {/* Edit Last Name */}
+            {editingField === 'last_name' ? (
+              <div className="flex gap-2 items-center">
+                <input
+                  type="text"
+                  value={editValue}
+                  onChange={e => setEditValue(e.target.value)}
+                  className="border rounded px-2 py-1 text-black bg-white"
+                  autoFocus
+                />
+                <Button size="sm" onClick={handleEditSave}>Save</Button>
+                <Button size="sm" variant="secondary" onClick={handleEditCancel}>Cancel</Button>
+              </div>
+            ) : (
+              <Button onClick={() => handleEditClick('last_name')}>
+                Edit Last Name
+              </Button>
+            )}
           </div>
 
           <div className="flex items-center gap-2 mb-4">
