@@ -29,6 +29,7 @@ interface ApiResponse {
 type Comment = {
     id: number;
     content: string;
+    comment?: string;
     created_at: string;
     deleted_at: string | null;
     user_id: number;
@@ -136,7 +137,7 @@ function IdeaDetailPageContent() {
           const formattedComments = Array.isArray(data.payload)
             ? data.payload.map((c: Comment) => ({
                 id: c.id,
-                content: c.content,
+                content: c.comment || c.content,
                 created_at: c.created_at,
                 deleted_at: c.deleted_at,
                 user_id: c.user_id,
@@ -175,17 +176,18 @@ function IdeaDetailPageContent() {
       if (response.ok) {
         const data = await response.json();
         const newCommentData = data.payload[0];
-        setComments((prev) => [...prev, {
-          id: newCommentData.id,
-          content: newCommentData.comment,
-          created_at: newCommentData.created_at,
-          deleted_at: newCommentData.deleted_at,
-          user_id: newCommentData.user_id,
-          suggestion_id: newCommentData.suggestion_id,
-          first_name: newCommentData.first_name || "Unknown",
-          last_name: newCommentData.last_name || "User",
-        }]);
-        setNewComment("");
+        const formatted = {
+        id: newCommentData.id,
+        content: newCommentData.comment || newCommentData.content,
+        created_at: newCommentData.created_at,
+        deleted_at: newCommentData.deleted_at,
+        user_id: newCommentData.user_id,
+        suggestion_id: newCommentData.suggestion_id,
+        first_name: newCommentData.first_name || "Unknown",
+        last_name: newCommentData.last_name || "User",
+      };
+        setComments((prev) => [...prev, formatted]);
+;
       }
     } catch (err) {
       console.error("Error adding comment:", err);
