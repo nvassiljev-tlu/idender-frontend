@@ -160,7 +160,7 @@ export default function AllUsersAdminPage() {
       else if (role === 'superadmin') scopeIds = [1, 3, 15];
 
       const res = await fetch(`https://api-staging.idender.services.nvassiljev.com/v1/users/${id}/scopes`, {
-        method: 'POST',
+        method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
