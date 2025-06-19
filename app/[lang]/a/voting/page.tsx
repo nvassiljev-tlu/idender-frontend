@@ -25,7 +25,6 @@ export default function VotingPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isFetchingIdea, setIsFetchingIdea] = useState(false);
   const [lang, setLang] = useState('');
-  const [ready, setReady] = useState(false);
   const [isCardVisible, setIsCardVisible] = useState(true);
 
   const cardRef = useRef<HTMLDivElement | null>(null);
@@ -48,7 +47,6 @@ export default function VotingPage() {
         await i18n.changeLanguage(language);
         Cookie.set('lang', language);
       }
-      setReady(true);
 
       const token = Cookie.get('sid');
       if (!token) return router.push(`/${language}/login`);

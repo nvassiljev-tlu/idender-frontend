@@ -164,32 +164,6 @@ export default function UserDetailPage() {
     }
   }, [router, userId]);
 
-  const updateName = async (field: 'first_name' | 'last_name', value: string) => {
-    if (!user) return;
-    try {
-      const token = Cookie.get('sid');
-      const res = await fetch(`https://api-staging.idender.services.nvassiljev.com/v1/users/${user.id}`, {
-        method: 'PATCH',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({ [field]: value }),
-      });
-
-      if (!res.ok) {
-        const errorData = await res.json();
-        setError(extractErrorMessage(errorData));
-        return;
-      }
-
-      setUser(prev => prev ? { ...prev, [field]: value } : prev);
-    } catch (e: unknown) {
-      setError(extractErrorMessage(e));
-    }
-  };
-
   const getScopes = useCallback(async () => {
     if (!user) return;
     try {
@@ -285,6 +259,7 @@ export default function UserDetailPage() {
       setEditingField(null);
       setEditValue('');
     } catch (e) {
+      console.error('Failed to update name:', e);
       setError('Failed to update name');
     }
   };
