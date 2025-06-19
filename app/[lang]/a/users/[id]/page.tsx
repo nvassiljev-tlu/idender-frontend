@@ -1,13 +1,10 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Cookie from 'js-cookie';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Loader2, XCircle } from 'lucide-react';
-import { useRef } from 'react';
 
 type User = {
   id: string;
@@ -56,27 +53,19 @@ const ALL_SCOPES = [
   { id: 15, name: 'user:superadmin' }, // Read only
 ];
 
-function useClickOutside(ref: React.RefObject<HTMLDivElement>, callback: () => void) {
-  useEffect(() => {
-    function handleClick(event: MouseEvent) {
-      if (ref.current && !ref.current.contains(event.target as Node)) {
-        callback();
-      }
-    }
-    document.addEventListener('mousedown', handleClick);
-    return () => document.removeEventListener('mousedown', handleClick);
-  }, [ref, callback]);
-}
-
 // Helper to extract error message from API response
-function extractErrorMessage(data: any): string {
-  return (
-    data?.errors?.message ||
-    data?.payload?.message ||
-    data?.payload?.error ||
-    data?.message ||
-    'Unknown error'
-  );
+function extractErrorMessage(data: unknown): string {
+  if (typeof data === 'object' && data !== null) {
+    const d = data as Record<string, any>;
+    return (
+      d?.errors?.message ||
+      d?.payload?.message ||
+      d?.payload?.error ||
+      d?.message ||
+      'Unknown error'
+    );
+  }
+  return 'Unknown error';
 }
 
 export default function UserDetailPage() {
@@ -145,10 +134,8 @@ export default function UserDetailPage() {
           (prev ? prev + ' ' : '') + extractErrorMessage(ideasData)
         );
       }
-    } catch (e: any) {
-      setError(
-        extractErrorMessage(e)
-      );
+    } catch (e: unknown) {
+      setError(extractErrorMessage(e));
     } finally {
       setLoading(false);
     }
@@ -175,12 +162,12 @@ export default function UserDetailPage() {
       }
 
       setUser(prev => prev ? { ...prev, [field]: value } : prev);
-    } catch (e: any) {
+    } catch (e: unknown) {
       setError(extractErrorMessage(e));
     }
   };
 
-  const getScopes = async () => {
+  const getScopes = useCallback(async () => {
     if (!user) return;
     try {
       const token = Cookie.get('sid');
@@ -201,10 +188,10 @@ export default function UserDetailPage() {
 
       setScopes(scopesData.payload);
       setPendingScopes(scopesData.payload.map((s: { id: number }) => s.id));
-    } catch (e: any) {
+    } catch (e: unknown) {
       setError(extractErrorMessage(e));
     }
-  };
+  }, [user]);
 
   const handleScopeChange = (scopeId: number, checked: boolean) => {
     if (
@@ -243,7 +230,7 @@ export default function UserDetailPage() {
       }
       getScopes();
       setShowScopeMenu(false);
-    } catch (e: any) {
+    } catch (e: unknown) {
       setError(extractErrorMessage(e));
     }
   };
@@ -254,13 +241,12 @@ export default function UserDetailPage() {
 
   useEffect(() => {
     getScopes();
-  }, [user]);
-
+  }, [getScopes]);
 
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-white" />
+        <span className="h-8 w-8 animate-spin text-white">Loading...</span>
       </div>
     );
   }
@@ -386,18 +372,18 @@ export default function UserDetailPage() {
           </div>
 
           {error && (
-  <div className="rounded border border-red-200 bg-red-50 p-4 m-4 flex items-center justify-between">
-    <div className="text-red-800 text-sm">{error}</div>
-    <button
-      className="ml-4 text-red-400 hover:text-red-700 text-xl font-bold"
-      onClick={() => setError('')}
-      aria-label="Close"
-      type="button"
-    >
-      ×
-    </button>
-  </div>
-)}
+            <div className="rounded border border-red-200 bg-red-50 p-4 m-4 flex items-center justify-between">
+              <div className="text-red-800 text-sm">{error}</div>
+              <button
+                className="ml-4 text-red-400 hover:text-red-700 text-xl font-bold"
+                onClick={() => setError('')}
+                aria-label="Close"
+                type="button"
+              >
+                ×
+              </button>
+            </div>
+          )}
 
           <Button onClick={() => router.back()} className="mt-4">
             Back
