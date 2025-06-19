@@ -153,11 +153,11 @@ export default function AllUsersAdminPage() {
     setError('');
     try {
       const token = Cookie.get('sid');
-      let scopeIds: number[] = [];
+      let scopes: number[] = [];
 
-      if (role === 'user') scopeIds = [1]; // remove scope 3, and do not add scope 1
-      else if (role === 'admin') scopeIds = [3];
-      else if (role === 'superadmin') scopeIds = [15];
+      if (role === 'user') scopes = [1]; // remove scope 3, and do not add scope 1
+      else if (role === 'admin') scopes = [3];
+      else if (role === 'superadmin') scopes = [15];
 
       const res = await fetch(`https://api-staging.idender.services.nvassiljev.com/v1/users/${id}/scopes`, {
         method: 'PATCH',
@@ -166,7 +166,7 @@ export default function AllUsersAdminPage() {
           Authorization: `Bearer ${token}`,
         },
         credentials: 'include',
-        body: JSON.stringify({ scopeIds }),
+        body: JSON.stringify({ scopes }),
       });
 
       const data = await res.json();
