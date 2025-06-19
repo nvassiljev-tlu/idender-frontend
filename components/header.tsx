@@ -115,14 +115,15 @@ export default function Header() {
           <span className="hidden sm:inline">{t('header.logout')}</span>
         </button>
       </div>
-      <button
-        onClick={() => router.push(`/${lang}/a/home`)}
-        className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-xl font-bold hover:text-slate-300 transition-colors"
-        aria-label="Return to home"
-        style={{ pointerEvents: 'auto' }}
-      >
-        Idender
-      </button>
+<button
+  onClick={() => router.push(`/${lang}/a/home`)}
+  className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-xl font-bold bg-gradient-to-r from-blue-600 via-white to-red-600 bg-clip-text text-transparent hover:opacity-80 transition-all"
+  aria-label="Return to home"
+  style={{ pointerEvents: 'auto' }}
+>
+  Idender
+</button>
+
       <div className="flex items-center ml-auto" ref={profileMenuRef}>
         <button
           onClick={() => setShowProfileMenu(!showProfileMenu)}
