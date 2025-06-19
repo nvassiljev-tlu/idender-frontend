@@ -56,14 +56,35 @@ const ALL_SCOPES = [
 // Helper to extract error message from API response
 function extractErrorMessage(data: unknown): string {
   if (typeof data === 'object' && data !== null) {
-    const d = data as Record<string, any>;
-    return (
-      d?.errors?.message ||
-      d?.payload?.message ||
-      d?.payload?.error ||
-      d?.message ||
-      'Unknown error'
-    );
+    // Use Record<string, unknown> instead of any
+    const d = data as Record<string, unknown>;
+    if (
+      typeof d.errors === 'object' &&
+      d.errors !== null &&
+      'message' in d.errors &&
+      typeof (d.errors as Record<string, unknown>).message === 'string'
+    ) {
+      return (d.errors as Record<string, unknown>).message as string;
+    }
+    if (
+      typeof d.payload === 'object' &&
+      d.payload !== null &&
+      'message' in d.payload &&
+      typeof (d.payload as Record<string, unknown>).message === 'string'
+    ) {
+      return (d.payload as Record<string, unknown>).message as string;
+    }
+    if (
+      typeof d.payload === 'object' &&
+      d.payload !== null &&
+      'error' in d.payload &&
+      typeof (d.payload as Record<string, unknown>).error === 'string'
+    ) {
+      return (d.payload as Record<string, unknown>).error as string;
+    }
+    if ('message' in d && typeof d.message === 'string') {
+      return d.message;
+    }
   }
   return 'Unknown error';
 }
