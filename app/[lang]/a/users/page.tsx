@@ -39,6 +39,9 @@ type RawUser = {
 };
 
 export default function AllUsersAdminPage() {
+  // 1. POST /v1/users/{id}/admin - чтобы дать админку
+  // 2. DELETE /v1/users/{id}/admin - чтобы забрать админку
+  // 3. POST /v1/users/{id}/transfer - чтобы передать суперадмина
   const [users, setUsers] = useState<User[]>([]);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [error, setError] = useState('');
