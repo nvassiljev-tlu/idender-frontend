@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Loader2, XCircle } from 'lucide-react';
+import { useRef } from 'react';
 
 type User = {
   id: string;
@@ -37,11 +38,56 @@ const statusMap: Record<number, string> = {
   5: 'Declined (Moderation)',
 };
 
+const ALL_SCOPES = [
+  { id: 1, name: 'auth:access' },
+  { id: 2, name: 'auth:signup' },
+  { id: 3, name: 'user:admin' }, // нельзя забрать обратно
+  { id: 4, name: 'users:moderate' },
+  { id: 5, name: 'users:scopes' },
+  { id: 6, name: 'ideas:read' },
+  { id: 7, name: 'ideas:create' },
+  { id: 8, name: 'ideas:update' },
+  { id: 9, name: 'ideas:moderate' },
+  { id: 10, name: 'comments:read' },
+  { id: 11, name: 'comments:create' },
+  { id: 12, name: 'comments:moderate' },
+  { id: 13, name: 'voting:read' },
+  { id: 14, name: 'voting:vote' },
+  { id: 15, name: 'user:superadmin' }, // Read only
+];
+
+function useClickOutside(ref: React.RefObject<HTMLDivElement>, callback: () => void) {
+  useEffect(() => {
+    function handleClick(event: MouseEvent) {
+      if (ref.current && !ref.current.contains(event.target as Node)) {
+        callback();
+      }
+    }
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [ref, callback]);
+}
+
+// Helper to extract error message from API response
+function extractErrorMessage(data: any): string {
+  return (
+    data?.errors?.message ||
+    data?.payload?.message ||
+    data?.payload?.error ||
+    data?.message ||
+    'Unknown error'
+  );
+}
+
 export default function UserDetailPage() {
   const [user, setUser] = useState<User | null>(null);
   const [ideas, setIdeas] = useState<Idea[]>([]);
+  const [scopes, setScopes] = useState<Array<{ id: number; name: string; assigned_by_other_admin?: boolean }>>([]);
+  const [pendingScopes, setPendingScopes] = useState<number[]>([]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
+  const [showScopeMenu, setShowScopeMenu] = useState(false);
+  const scopeMenuRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const pathname = usePathname();
   const userId = pathname.split('/').pop();
@@ -89,16 +135,20 @@ export default function UserDetailPage() {
           is_admin: u.is_admin || false,
         });
       } else {
-        setError('Failed to load user data.');
+        setError(extractErrorMessage(userData));
       }
 
       if (ideasRes.ok && ideasData.status === 'OPERATION-OK') {
         setIdeas(ideasData.payload);
       } else {
-        setError(prev => prev + ' Failed to load user ideas.');
+        setError(prev =>
+          (prev ? prev + ' ' : '') + extractErrorMessage(ideasData)
+        );
       }
-    } catch {
-      setError('Could not connect to server.');
+    } catch (e: any) {
+      setError(
+        extractErrorMessage(e)
+      );
     } finally {
       setLoading(false);
     }
@@ -120,39 +170,92 @@ export default function UserDetailPage() {
 
       if (!res.ok) {
         const errorData = await res.json();
-        throw new Error(errorData.message || 'Failed to update name');
+        setError(extractErrorMessage(errorData));
+        return;
       }
 
       setUser(prev => prev ? { ...prev, [field]: value } : prev);
-    } catch (e) {
-      console.error(e);
-      setError(`Failed to update ${field === 'first_name' ? 'First Name' : 'Last Name'}.`);
+    } catch (e: any) {
+      setError(extractErrorMessage(e));
     }
   };
 
-  const removeAvatar = async () => {
+  const getScopes = async () => {
     if (!user) return;
     try {
       const token = Cookie.get('sid');
-      const res = await fetch(`https://api-staging.idender.services.nvassiljev.com/v1/users/${user.id}/avatar`, {
-        method: 'DELETE',
+      const res = await fetch(`https://api-staging.idender.services.nvassiljev.com/v1/users/${user.id}/scopes`, {
+        method: 'GET',
         headers: {
           Authorization: `Bearer ${token}`,
         },
         credentials: 'include',
       });
 
-      if (!res.ok) throw new Error('Failed to remove avatar');
+      const scopesData = await res.json();
 
-      setUser(prev => prev ? { ...prev, avatar_url: '' } : prev);
-    } catch {
-      setError('Failed to remove avatar.');
+      if (!res.ok) {
+        setError(extractErrorMessage(scopesData));
+        return;
+      }
+
+      setScopes(scopesData.payload);
+      setPendingScopes(scopesData.payload.map((s: { id: number }) => s.id));
+    } catch (e: any) {
+      setError(extractErrorMessage(e));
+    }
+  };
+
+  const handleScopeChange = (scopeId: number, checked: boolean) => {
+    if (
+      scopeId === 3 && // 3 = user:admin
+      !checked &&      // trying to uncheck
+      scopes.some(s => s.id === 3 && s.assigned_by_other_admin)
+    ) {
+      setError('If admin has been assigned by other admin before, you cannot take his admin rights back.');
+      return;
+    }
+    setPendingScopes((prev) =>
+      checked ? [...prev, scopeId] : prev.filter((id) => id !== scopeId)
+    );
+  };
+
+  const saveScopes = async () => {
+    if (!user) return;
+    try {
+      const token = Cookie.get('sid');
+      const res = await fetch(
+        `https://api-staging.idender.services.nvassiljev.com/v1/users/${user.id}/scopes`,
+        {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+          body: JSON.stringify({ scopes: pendingScopes }),
+        }
+      );
+      if (!res.ok) {
+        const data = await res.json();
+        setError(extractErrorMessage(data));
+        return;
+      }
+      getScopes();
+      setShowScopeMenu(false);
+    } catch (e: any) {
+      setError(extractErrorMessage(e));
     }
   };
 
   useEffect(() => {
     fetchUser();
   }, [fetchUser]);
+
+  useEffect(() => {
+    getScopes();
+  }, [user]);
+
 
   if (loading) {
     return (
@@ -162,38 +265,35 @@ export default function UserDetailPage() {
     );
   }
 
-  if (error) {
-    return (
-      <Alert className="bg-red-100 text-red-700 m-4">
-        <XCircle className="h-5 w-5 mr-2" />
-        <div>
-          <AlertTitle className="text-red-800">Error</AlertTitle>
-          <AlertDescription>{error}</AlertDescription>
-        </div>
-      </Alert>
-    );
-  }
-
   if (!user) return null;
 
   return (
     <div className="min-h-screen bg-slate-100 px-4 pt-16 pb-8">
       <div className="w-full max-w-3xl mx-auto bg-white shadow rounded">
         {/* Header */}
-        <div className="sticky top-0 z-10 bg-white border-b p-6 flex items-center gap-4 mb-6">
-          <Avatar>
-            <AvatarImage src={user.avatar_url} />
-            <AvatarFallback className="text-blue-900">
-              {user.first_name?.[0]}{user.last_name?.[0]}
-            </AvatarFallback>
-          </Avatar>
-          <div>
-            <h1 className="text-2xl font-bold text-blue-900">
-              {user.first_name} {user.last_name}
-            </h1>
-            <p className="text-sm text-blue-800">Email: {user.email}</p>
-            <p className="text-sm text-blue-800">Status: {user.is_active ? 'Active' : 'Inactive'}</p>
+        <div className="sticky top-0 z-10 bg-white border-b p-6 flex items-center justify-between mb-6">
+          <div className="flex items-center gap-4">
+            <Avatar>
+              <AvatarImage src={user.avatar_url} />
+              <AvatarFallback className="text-blue-900">
+                {user.first_name?.[0]}{user.last_name?.[0]}
+              </AvatarFallback>
+            </Avatar>
+            <div>
+              <h1 className="text-2xl font-bold text-blue-900">
+                {user.first_name} {user.last_name}
+              </h1>
+              <p className="text-sm text-blue-800">Email: {user.email}</p>
+              <p className="text-sm text-blue-800">Status: {user.is_active ? 'Active' : 'Inactive'}</p>
+            </div>
           </div>
+          <Button
+            variant="default"
+            size="default"
+            onClick={() => setShowScopeMenu((v) => !v)}
+          >
+            Show All Scopes
+          </Button>
         </div>
 
         {/* Body */}
@@ -215,9 +315,53 @@ export default function UserDetailPage() {
             >
               Edit Last Name
             </Button>
-            <Button variant="destructive" onClick={removeAvatar}>
-              Remove Avatar
-            </Button>
+          </div>
+
+          <div className="flex items-center gap-2 mb-4">
+            <div className="relative">
+              {showScopeMenu && (
+                <div
+                  ref={scopeMenuRef}
+                  className="absolute left-0 z-20 mt-2 bg-black border rounded shadow-lg p-4 w-72"
+                >
+                  <h3 className="font-semibold mb-2">User Scopes</h3>
+                  <ul>
+                    {ALL_SCOPES.map((scope) => {
+                      const checked = pendingScopes.includes(scope.id);
+                      return (
+                        <li
+                          key={scope.id}
+                          className={`flex items-center py-1 ${
+                            scope.id === 1 || scope.id === 2 || scope.id === 15 ? 'text-gray-400' : ''
+                          }`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={checked}
+                            disabled={scope.id === 15}
+                            className="mr-2"
+                            onChange={
+                              scope.id === 1 || scope.id === 2 || scope.id === 15
+                                ? undefined
+                                : (e) => handleScopeChange(scope.id, e.target.checked)
+                            }
+                          />
+                          <span className="whitespace-nowrap overflow-visible">{scope.name}</span>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                  <div className="flex justify-end mt-4 gap-2">
+                    <Button size="sm" variant="secondary" onClick={() => setShowScopeMenu(false)}>
+                      Cancel
+                    </Button>
+                    <Button size="sm" onClick={saveScopes}>
+                      Save
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
           <div>
@@ -240,6 +384,20 @@ export default function UserDetailPage() {
               )}
             </div>
           </div>
+
+          {error && (
+  <div className="rounded border border-red-200 bg-red-50 p-4 m-4 flex items-center justify-between">
+    <div className="text-red-800 text-sm">{error}</div>
+    <button
+      className="ml-4 text-red-400 hover:text-red-700 text-xl font-bold"
+      onClick={() => setError('')}
+      aria-label="Close"
+      type="button"
+    >
+      ×
+    </button>
+  </div>
+)}
 
           <Button onClick={() => router.back()} className="mt-4">
             Back
