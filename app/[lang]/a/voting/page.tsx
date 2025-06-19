@@ -259,7 +259,7 @@ export default function VotingPage() {
         </div>
       </div>
 
-      <div className="text-sm text-gray-400 mt-4 select-none">
+      <div className="text-sm text-white mt-4 select-none">
         Swipe left — 👎 | Swipe right — 👍
       </div>
     </div>
