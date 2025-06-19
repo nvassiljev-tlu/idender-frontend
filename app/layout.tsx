@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Idender",
-  description: "Tallinn French Lyceum's student internal website.",
+  description: "Tallinn French Lyceum's student internal website",
 };
 
  export default function RootLayout({
