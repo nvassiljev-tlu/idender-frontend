@@ -33,6 +33,7 @@ const statusMap: Record<number, string> = {
   3: 'Approved',
   4: 'Declined (by School)',
   5: 'Declined (Moderation)',
+  6: 'Declined (voting)'
 };
 
 const ALL_SCOPES = [

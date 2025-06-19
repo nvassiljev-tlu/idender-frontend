@@ -58,6 +58,7 @@ function IdeaDetailPageContent() {
     3: t("status.approved"),
     4: t("status.declined_school"),
     5: t("status.declined_moderation"),
+    6: t("status.declined_voting"),
   };
 
   const getNextAllowedStatuses = (currentStatus: number) => {
@@ -187,6 +188,7 @@ function IdeaDetailPageContent() {
         last_name: newCommentData.last_name || "User",
       };
         setComments((prev) => [...prev, formatted]);
+        setNewComment("");
 ;
       }
     } catch (err) {

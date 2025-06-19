@@ -113,7 +113,7 @@ export default function ResetPasswordPage() {
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
             placeholder={t('newPassword')}
-            className="h-auto w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-slate-700"
+            className="h-auto w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-slate-700 text-black"
             required
             disabled={loading}
           />
@@ -123,7 +123,7 @@ export default function ResetPasswordPage() {
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             placeholder={t('confirmPassword')}
-            className="h-auto w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-slate-700"
+            className="h-auto w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-slate-700 text-black"
             required
             disabled={loading}
           />

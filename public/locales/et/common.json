@@ -47,7 +47,8 @@
     "pending_admin": "Ootab kooli otsust",
     "approved": "Heaks kiidetud",
     "declined_school": "Tagasi lükatud (kool)",
-    "declined_moderation": "Tagasi lükatud (moderaator)"
+    "declined_moderation": "Tagasi lükatud (moderaator)",
+    "declined_voting": "Tagasi lükatud (hääletus)"
   },
   "status.label": "Staatus",
   "submittedBy": "Esitanud",
@@ -83,7 +84,8 @@
     "pending_admin": "Kooli juhtkonna otsust ootab",
     "approved": "Heaks kiidetud",
     "declined_school": "Tagasi lükatud (kooli poolt)",
-    "declined_moderation": "Tagasi lükatud (moderaator)"
+    "declined_moderation": "Tagasi lükatud (moderaator)",
+    "declined_voting": "Tagasi lükatud (hääletuse poolt)"
   },
   "allIdeas": {
     "title": "Kõik ideed"
@@ -132,8 +134,13 @@
   "noNews": "Kuvamiseks pole uudiseid.",
   "refresh": "Värskenda",
   "createIdea": "Loo idee",
-  "voting": "Hääletamine"
-
+  "voting": "Hääletamine",
+  "votingPage": {
+      "noMoreIdeas": "Rohkem ideid hääletamiseks ei ole.",
+      "goToHomepage": "Mine avalehele",
+      "swipeInstruction": "Lükka vasakule, et 👎 | Lükka paremale, et 👍"
+    },
+  "passwordResetSuccess": "Parooli lähtestamine õnnestus! Nüüd saad sisse logida uue parooliga."
  }
 
 

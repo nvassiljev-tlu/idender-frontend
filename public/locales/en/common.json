@@ -47,7 +47,8 @@
     "pending_admin": "Pending School Administration Decision",
     "approved": "Approved",
     "declined_school": "Declined (by School)",
-    "declined_moderation": "Declined (Moderation)"
+    "declined_moderation": "Declined (Moderation)",
+    "declined_voting": "Declined (by Voting)"
   },
   "status.label": "Status",
   "submittedBy": "Submitted by",
@@ -83,7 +84,8 @@
     "pending_admin": "Pending School Administration Decision",
     "approved": "Approved",
     "declined_school": "Declined (by School)",
-    "declined_moderation": "Declined (Moderation)"
+    "declined_moderation": "Declined (Moderation)",
+    "declined_voting": "Declined (by Voting)"
   },
   "allIdeas": {
     "title": "All Ideas"
@@ -132,5 +134,11 @@
   "noNews": "No news to display.",
   "refresh": "Refresh",
   "createIdea": "Create idea",
-  "voting": "Voting"
+  "voting": "Voting",
+  "votingPage": {
+    "noMoreIdeas": "No more ideas to vote on.",
+    "goToHomepage": "Go to Homepage",
+    "swipeInstruction": "Swipe left to 👎 | Swipe right to 👍"
+  },
+  "passwordResetSuccess": "Password reset successful! You can now log in with your new password."
 }

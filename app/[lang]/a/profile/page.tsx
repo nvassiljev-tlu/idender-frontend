@@ -93,7 +93,7 @@ export default function ProfilePage() {
       Cookies.set('lang', selectedLang);
       i18n.changeLanguage(selectedLang);
       setShowAlert(true);
-      setTimeout(() => setShowAlert(false), 3000);
+      router.push(`/${selectedLang}/a/profile`);
     } catch (error) {
       console.error('Failed to update profile:', error);
     }

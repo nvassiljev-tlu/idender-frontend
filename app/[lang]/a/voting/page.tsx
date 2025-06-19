@@ -203,12 +203,12 @@ export default function VotingPage() {
   if (!idea) {
     return (
       <div className="min-h-screen bg-slate-500 flex flex-col justify-center items-center text-white px-4">
-        <div className="text-base mt-10 text-center">{t('noMoreIdeas')}</div>
+        <div className="text-base mt-10 text-center">{t('votingPage.noMoreIdeas')}</div>
         <Button
           className="mt-6 w-40 rounded-none bg-white text-slate-700 hover:bg-slate-200"
           onClick={() => router.push(`/${lang}/a/home`)}
         >
-          {t('goToHomepage')}
+          {t('votingPage.goToHomepage')}
         </Button>
       </div>
     );
@@ -265,7 +265,7 @@ export default function VotingPage() {
       </div>
 
       <div className="text-sm text-white mt-4 select-none">
-        {t('swipeInstruction')}
+        {t('votingPage.swipeInstruction')}
       </div>
     </div>
   );

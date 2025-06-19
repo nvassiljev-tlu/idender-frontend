@@ -47,7 +47,8 @@
     "pending_admin": "En attente de décision de l'administration",
     "approved": "Approuvé",
     "declined_school": "Refusé (par l'école)",
-    "declined_moderation": "Refusé (modération)"
+    "declined_moderation": "Refusé (modération)",
+    "declined_voting": "Refusé (vote)"
   },
   "status.label": "Statut",
   "submittedBy": "Soumis par",
@@ -71,7 +72,8 @@
     "pending_admin": "En attente de décision de l'administration scolaire",
     "approved": "Approuvé",
     "declined_school": "Refusé (par l'école)",
-    "declined_moderation": "Refusé (modération)"
+    "declined_moderation": "Refusé (modération)",
+    "declined_voting": "Refusé (vote)"
   },
   "myIdeas.title": "Mes idées",
   "error.loadIdeas": "Échec du chargement des idées.",
@@ -132,5 +134,11 @@
   "noNews": "Aucune actualité à afficher.",
   "refresh": "Rafraîchir",
   "createIdea": "Créer une idée",
-  "voting": "Vote"
+  "voting": "Vote",
+  "votingPage": {
+    "noMoreIdeas": "Plus d'idées à voter.",
+    "goToHomepage": "Aller à la page d'accueil",
+    "swipeInstruction": "Swipez à gauche pour 👎 | Swipez à droite pour 👍"
+  },
+  "passwordResetSuccess": "Réinitialisation du mot de passe réussie ! Vous pouvez maintenant vous connecter avec votre nouveau mot de passe."
 }
