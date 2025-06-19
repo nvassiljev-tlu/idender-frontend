@@ -63,11 +63,11 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="bg-white backdrop-blur-sm p-6 rounded-xl shadow-lg max-w-md w-full">
-        <h1 className="text-4xl sm:text-6xl md:text-5xl font-bold text-slate-700 text-center">
-          {t('appTitle')}
-        </h1>
+<div className="min-h-screen flex items-center justify-center">
+  <div className="bg-white p-6 rounded-xl shadow-lg max-w-md w-full">
+    <h1 className="text-4xl sm:text-6xl md:text-5xl text-center font-bold bg-gradient-to-r from-blue-800 via-gray-300 to-red-700 bg-clip-text text-transparent drop-shadow-[0_1px_2px_rgba(0,0,0,0.25)]">
+      {t('appTitle')}
+    </h1>
         <LoginForm />
         {error && <p className="text-red-500 mt-2 text-sm">{error}</p>}
       </div>
