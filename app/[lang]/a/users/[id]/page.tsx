@@ -281,7 +281,7 @@ export default function UserDetailPage() {
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
-        <span className="h-8 w-8 animate-spin text-white">Loading...</span>
+        <span className="text-white">Loading...</span>
       </div>
     );
   }
