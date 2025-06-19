@@ -52,43 +52,6 @@ export default function IdenderDashboard() {
     setLang(language);
   }, []);
 
-  useEffect(() => {
-    const token = Cookie.get('sid');
-    if (!token) {
-      router.push('/login');
-      return;
-    }
-
-    const checkLogin = async () => {
-      try {
-        const res = await fetch('https://api-staging.idender.services.nvassiljev.com/v1/oauth/me', {
-          method: 'GET',
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (res.status !== 200) {
-          Cookie.remove('sid');
-          router.push('/login');
-          return;
-        }
-
-        await fetchNews();
-      } catch (err) {
-        console.error(err);
-        Cookie.remove('sid');
-        router.push('/login');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    checkLogin();
-  }, [router]);
-
   const fetchNews = useCallback(async () => {
   try {
     const token = Cookie.get('sid');
@@ -112,6 +75,43 @@ export default function IdenderDashboard() {
     setError(t('fetchError'));
   }
 }, [t]);
+
+useEffect(() => {
+  const token = Cookie.get('sid');
+  if (!token) {
+    router.push('/login');
+    return;
+  }
+
+  const checkLogin = async () => {
+    try {
+      const res = await fetch('https://api-staging.idender.services.nvassiljev.com/v1/oauth/me', {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (res.status !== 200) {
+        Cookie.remove('sid');
+        router.push('/login');
+        return;
+      }
+
+      await fetchNews();
+    } catch (err) {
+      console.error(err);
+      Cookie.remove('sid');
+      router.push('/login');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  checkLogin();
+}, [router, fetchNews]);
 
   const handleCreateIdea = () => {
     router.push(`/${lang}/a/new-idea`);
