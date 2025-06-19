@@ -70,10 +70,16 @@ export default function SignupPage() {
         body: JSON.stringify({ email, first_name: firstName, last_name: lastName, password }),
       });
 
-      const data: Record<string, unknown> = await res.json();
+      const data: any = await res.json();
 
       if (res.status === 201) {
         setUserEmail(email);
+        
+        // Extract OTP code from API response
+        if (data?.payload?.data?.otp?.code) {
+          setOtp(data.payload.data.otp.code.toString());
+        }
+        
         setShowOtpPopup(true);
         setShowAlert(false);
       } else {
@@ -99,7 +105,7 @@ export default function SignupPage() {
         body: JSON.stringify({ email: userEmail, code: otp }),
       });
 
-      const data: Record<string, unknown> = await res.json();
+      const data: any = await res.json();
 
       if (res.status === 200) {
         setAlertType('success');
