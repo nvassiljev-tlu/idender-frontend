@@ -12,6 +12,45 @@ import { CheckCircle, AlertCircle } from 'lucide-react';
 import { REGEXP_ONLY_DIGITS } from 'input-otp';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
 
+interface SignupResponse {
+  status: string;
+  http_code: number;
+  build: string;
+  time: number;
+  payload: {
+    message: string;
+    data: {
+      user: {
+        id: string;
+        email: string;
+        first_name: string;
+        last_name: string;
+        is_active: boolean;
+      };
+      otp: {
+        email: string;
+        code: string;
+        expires_at: number;
+        created_at: number;
+        id: string;
+        verified: number;
+      };
+    };
+  };
+  errors: Record<string, unknown>;
+}
+
+interface OtpVerifyResponse {
+  status: string;
+  http_code: number;
+  build: string;
+  time: number;
+  payload: {
+    message: string;
+  };
+  errors: Record<string, unknown>;
+}
+
 export default function SignupPage() {
   const router = useRouter();
   const params = useParams();
@@ -70,7 +109,7 @@ export default function SignupPage() {
         body: JSON.stringify({ email, first_name: firstName, last_name: lastName, password }),
       });
 
-      const data: any = await res.json();
+      const data: SignupResponse = await res.json();
 
       if (res.status === 201) {
         setUserEmail(email);
@@ -83,7 +122,10 @@ export default function SignupPage() {
         setShowOtpPopup(true);
         setShowAlert(false);
       } else {
-        const message = (data?.errors as string) || t('networkError');
+        const message =
+          (typeof data?.errors === 'string'
+            ? data.errors
+            : (data?.payload?.message as string)) || t('networkError');
         showError(t('signupFailed'), message);
       }
     } catch (err) {
@@ -105,7 +147,7 @@ export default function SignupPage() {
         body: JSON.stringify({ email: userEmail, code: otp }),
       });
 
-      const data: any = await res.json();
+      const data: OtpVerifyResponse = await res.json();
 
       if (res.status === 200) {
         setAlertType('success');
@@ -114,7 +156,7 @@ export default function SignupPage() {
         setShowAlert(true);
         setTimeout(() => router.push(`/${lang}/login`), 2000);
       } else {
-        showError(t('otpFailed'), (data?.message as string) || t('invalidOtp'));
+        showError(t('otpFailed'), (data?.payload?.message as string) || t('invalidOtp'));
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : t('networkError');
