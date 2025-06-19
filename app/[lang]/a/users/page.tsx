@@ -400,13 +400,9 @@ export default function AllUsersAdminPage() {
                         <>
                           {transferAdminOpenFor === user.id ? (
                             <div className="p-2">
-                              <input
-                                type="email"
-                                placeholder="Enter email to transfer"
-                                value={transferEmail}
-                                onChange={(e) => setTransferEmail(e.target.value)}
-                                className="border p-1 rounded w-full"
-                              />
+                              <div className="text-sm mb-2">
+                                Transfer Superadmin rights to:
+                              </div>
                               {transferError && (
                                 <div className="text-red-600 text-sm mt-1">{transferError}</div>
                               )}
@@ -469,37 +465,43 @@ export default function AllUsersAdminPage() {
                             <>
                               {transferAdminOpenFor === user.id ? (
                                 <div className="p-2">
-                                  <input
-                                    type="email"
-                                    placeholder="Enter email to transfer"
-                                    value={transferEmail}
-                                    onChange={(e) => setTransferEmail(e.target.value)}
-                                    className="border p-1 rounded w-full"
-                                  />
                                   {transferError && (
                                     <div className="text-red-600 text-sm mt-1">{transferError}</div>
                                   )}
                                   <div className="flex gap-2 mt-2">
-                                    <Button size="sm" onClick={() => transferSuperadmin(user.id)}>
-                                      Transfer Superadmin
-                                    </Button>
                                     <Button
                                       size="sm"
                                       variant="outline"
                                       onClick={() => {
-                                        setTransferAdminOpenFor(null);
-                                        setTransferEmail('');
-                                        setTransferError('');
+                                      if (
+                                        window.confirm(
+                                        'Are you sure you want to transfer superadmin rights to this user? This action cannot be undone.'
+                                        )
+                                      ) {
+                                        transferSuperadmin(user.id);
+                                      }
                                       }}
                                     >
-                                      Cancel
+                                      Transfer Superadmin
                                     </Button>
                                   </div>
                                 </div>
                               ) : (
-                                <DropdownMenuItem onClick={() => setTransferAdminOpenFor(user.id)}>
-                                  Transfer Superadmin rights
-                                </DropdownMenuItem>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => {
+                                    if (
+                                      window.confirm(
+                                        'Are you sure you want to transfer superadmin rights to this user? This action cannot be undone.'
+                                      )
+                                    ) {
+                                      transferSuperadmin(user.id);
+                                    }
+                                  }}
+                                >
+                                  Transfer Superadmin
+                                </Button>
                               )}
                             </>
                           )}
