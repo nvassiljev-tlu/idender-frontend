@@ -173,7 +173,7 @@ export default function AllIdeasAdminPage() {
                       {idea.description}
                     </p>
                     <p className="text-sm text-slate-400 line-clamp-1 text-ellipsis">
-                      {t('submittedBy')}: {idea.is_anonymus === 1 ? 'Anonymous' : `${idea.first_name ?? ''} ${idea.last_name ?? ''}`}
+                      {t('submittedBy')}: {idea.first_name ?? ''} {idea.last_name ?? ''}
                     </p>
                     <p className="text-sm font-semibold line-clamp-1 text-ellipsis">
                       {t('status.label')}: {statusMap[idea.status]}
